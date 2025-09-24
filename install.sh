@@ -1,9 +1,18 @@
-#!/bin/bash
+#!/bin/sh
 
 # Rijan OS Welcome Screen Installer
 # Automatic installation script for Linux systems
+# Compatible with sh and bash
 
 set -e  # Exit on any error
+
+# Check if we have bash available, if not continue with sh
+if command -v bash >/dev/null 2>&1; then
+    # Re-execute with bash if available for better compatibility
+    if [ "$0" != "/bin/bash" ] && [ "$0" != "/usr/bin/bash" ]; then
+        exec bash "$0" "$@"
+    fi
+fi
 
 # Colors for output
 RED='\033[0;31m'
@@ -31,7 +40,7 @@ print_error() {
 
 # Check if running as root
 check_root() {
-    if [[ $EUID -ne 0 ]]; then
+    if [ "$(id -u)" -ne 0 ]; then
         print_error "This script must be run as root (use sudo)"
         exit 1
     fi
@@ -65,7 +74,7 @@ setup_application() {
     
     # Create virtual environment
     python3 -m venv venv
-    source venv/bin/activate
+    . venv/bin/activate
     
     # Install Python dependencies
     pip install -r requirements.txt
@@ -84,7 +93,7 @@ create_launcher() {
     cat > /usr/local/bin/rijan-welcome << 'EOF'
 #!/bin/bash
 cd /opt/rijan-os-welcome
-source venv/bin/activate
+. venv/bin/activate
 python3 main.py
 EOF
     
@@ -151,7 +160,7 @@ test_installation() {
     print_info "Testing installation..."
     
     # Test launcher script
-    if [[ -x /usr/local/bin/rijan-welcome ]]; then
+    if [ -x /usr/local/bin/rijan-welcome ]; then
         print_success "Launcher script is executable"
     else
         print_error "Launcher script not found or not executable"
@@ -159,7 +168,7 @@ test_installation() {
     fi
     
     # Test systemd service
-    if systemctl is-enabled rijan-welcome.service &>/dev/null; then
+    if systemctl is-enabled rijan-welcome.service >/dev/null 2>&1; then
         print_success "Systemd service is enabled"
     else
         print_warning "Systemd service is not enabled"
@@ -167,8 +176,8 @@ test_installation() {
     
     # Test Python dependencies
     cd /opt/rijan-os-welcome
-    source venv/bin/activate
-    if python3 -c "import tkinter, PIL" &>/dev/null; then
+    . venv/bin/activate
+    if python3 -c "import tkinter, PIL" >/dev/null 2>&1; then
         print_success "Python dependencies are working"
     else
         print_error "Python dependencies test failed"
@@ -214,8 +223,8 @@ case "${1:-install}" in
         ;;
     "uninstall")
         print_info "Uninstalling Rijan OS Welcome Screen..."
-        systemctl stop rijan-welcome.service 2>/dev/null || true
-        systemctl disable rijan-welcome.service 2>/dev/null || true
+        systemctl stop rijan-welcome.service >/dev/null 2>&1 || true
+        systemctl disable rijan-welcome.service >/dev/null 2>&1 || true
         rm -rf /opt/rijan-os-welcome
         rm -f /usr/local/bin/rijan-welcome
         rm -f /etc/systemd/system/rijan-welcome.service
