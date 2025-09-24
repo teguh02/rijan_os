@@ -220,6 +220,8 @@ class MainWindow(QMainWindow):
                 QPushButton {
                     font-size: 14px;
                     font-weight: bold;
+                    font-family: 'Arial', 'DejaVu Sans', sans-serif;
+                    color: #000000;
                     padding: 10px;
                     margin: 5px;
                     border: 2px solid #007acc;
@@ -229,9 +231,11 @@ class MainWindow(QMainWindow):
                 QPushButton:hover {
                     background-color: #e6f3ff;
                     border-color: #0056b3;
+                    color: #000000;
                 }
                 QPushButton:pressed {
                     background-color: #cce7ff;
+                    color: #000000;
                 }
             """)
             btn.clicked.connect(lambda checked, k=key: self.install_stack(k))
@@ -262,6 +266,8 @@ class MainWindow(QMainWindow):
                 QPushButton {
                     font-size: 14px;
                     font-weight: bold;
+                    font-family: 'Arial', 'DejaVu Sans', sans-serif;
+                    color: #000000;
                     padding: 10px;
                     margin: 5px;
                     border: 2px solid #28a745;
@@ -271,9 +277,11 @@ class MainWindow(QMainWindow):
                 QPushButton:hover {
                     background-color: #e6ffe6;
                     border-color: #1e7e34;
+                    color: #000000;
                 }
                 QPushButton:pressed {
                     background-color: #ccffcc;
+                    color: #000000;
                 }
             """)
             btn.clicked.connect(lambda checked, k=key: self.install_stack(k))
@@ -307,6 +315,8 @@ class MainWindow(QMainWindow):
                 QPushButton {
                     font-size: 14px;
                     font-weight: bold;
+                    font-family: 'Arial', 'DejaVu Sans', sans-serif;
+                    color: #000000;
                     padding: 10px;
                     margin: 5px;
                     border: 2px solid #ff6b35;
@@ -316,9 +326,11 @@ class MainWindow(QMainWindow):
                 QPushButton:hover {
                     background-color: #ffe6d9;
                     border-color: #e55a2b;
+                    color: #000000;
                 }
                 QPushButton:pressed {
                     background-color: #ffd9cc;
+                    color: #000000;
                 }
             """)
             btn.clicked.connect(lambda checked, a=app: self.install_single_package(a))
@@ -352,6 +364,8 @@ class MainWindow(QMainWindow):
                 QPushButton {
                     font-size: 14px;
                     font-weight: bold;
+                    font-family: 'Arial', 'DejaVu Sans', sans-serif;
+                    color: #000000;
                     padding: 10px;
                     margin: 5px;
                     border: 2px solid #dc3545;
@@ -361,9 +375,11 @@ class MainWindow(QMainWindow):
                 QPushButton:hover {
                     background-color: #ffe6e6;
                     border-color: #c82333;
+                    color: #000000;
                 }
                 QPushButton:pressed {
                     background-color: #ffcccc;
+                    color: #000000;
                 }
             """)
             btn.clicked.connect(lambda checked, a=app: self.install_single_package(a))
@@ -378,6 +394,8 @@ class MainWindow(QMainWindow):
             QPushButton {
                 font-size: 16px;
                 font-weight: bold;
+                font-family: 'Arial', 'DejaVu Sans', sans-serif;
+                color: #ffffff;
                 padding: 15px;
                 margin: 10px;
                 border: 3px solid #dc3545;
@@ -419,6 +437,8 @@ class MainWindow(QMainWindow):
                 QPushButton {
                     font-size: 14px;
                     font-weight: bold;
+                    font-family: 'Arial', 'DejaVu Sans', sans-serif;
+                    color: #000000;
                     padding: 10px;
                     margin: 5px;
                     border: 2px solid #6f42c1;
@@ -428,9 +448,11 @@ class MainWindow(QMainWindow):
                 QPushButton:hover {
                     background-color: #f0e6ff;
                     border-color: #5a32a3;
+                    color: #000000;
                 }
                 QPushButton:pressed {
                     background-color: #e6d9ff;
+                    color: #000000;
                 }
             """)
             btn.clicked.connect(func)
@@ -460,6 +482,8 @@ class MainWindow(QMainWindow):
                 QPushButton {
                     font-size: 14px;
                     font-weight: bold;
+                    font-family: 'Arial', 'DejaVu Sans', sans-serif;
+                    color: #000000;
                     padding: 10px;
                     margin: 5px;
                     border: 2px solid #17a2b8;
@@ -469,9 +493,11 @@ class MainWindow(QMainWindow):
                 QPushButton:hover {
                     background-color: #e6f7ff;
                     border-color: #138496;
+                    color: #000000;
                 }
                 QPushButton:pressed {
                     background-color: #ccf2ff;
+                    color: #000000;
                 }
             """)
             btn.clicked.connect(func)
