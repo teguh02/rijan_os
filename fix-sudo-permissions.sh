@@ -1,6 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 # Fix Sudo Permissions untuk RijanOS Assistant
 # Script untuk memperbaiki konfigurasi sudoers agar aplikasi bisa berjalan tanpa password
+# Compatible with both sh and bash
 
 set -e  # Exit on any error
 
@@ -36,9 +37,9 @@ print_success() {
 }
 
 # Check if running as root or with sudo
-if [ "$EUID" -ne 0 ]; then
+if [ "$(id -u)" -ne 0 ]; then
     print_error "Script ini harus dijalankan dengan sudo!"
-    echo "Gunakan: sudo bash fix-sudo-permissions.sh"
+    echo "Gunakan: sudo sh fix-sudo-permissions.sh"
     exit 1
 fi
 
@@ -50,7 +51,7 @@ fi
 
 print_header "2. Create comprehensive sudoers rule..."
 # Create comprehensive sudoers rule for passwordless sudo commands
-tee /etc/sudoers.d/rijanos-assistant > /dev/null << 'EOF'
+cat > /etc/sudoers.d/rijanos-assistant << 'EOF'
 # RijanOS Assistant - Sudoers Configuration
 # Allow users to run RijanOS Assistant as root without password for autostart
 %sudo ALL=(ALL) NOPASSWD: /opt/rijanos-assistant/rijanos-assistant-root.sh
@@ -111,10 +112,15 @@ fi
 
 print_header "4. Test sudo access..."
 print_status "Testing passwordless sudo access for current user..."
-if sudo -n -u "$SUDO_USER" sudo -n apt --version > /dev/null 2>&1; then
-    print_success "Passwordless sudo access configured successfully!"
+# Test with simpler approach for POSIX compatibility
+if [ -n "$SUDO_USER" ]; then
+    if su - "$SUDO_USER" -c "sudo -n apt --version" >/dev/null 2>&1; then
+        print_success "Passwordless sudo access configured successfully!"
+    else
+        print_warning "Sudo access test failed. You may need to logout and login again."
+    fi
 else
-    print_warning "Sudo access test failed. You may need to logout and login again."
+    print_warning "Cannot test sudo access - not running via sudo. Please test manually."
 fi
 
 print_success "Sudo permissions fixed successfully!"

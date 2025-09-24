@@ -128,7 +128,7 @@ chmod +x /opt/rijanos-assistant/rijanos-assistant-root.sh
 print_header "8a. Configure sudo for autostart..."
 print_status "Adding sudoers rule for RijanOS Assistant autostart..."
 # Create sudoers rule for passwordless sudo commands
-sudo tee /etc/sudoers.d/rijanos-assistant > /dev/null << 'EOF'
+sudo sh -c 'cat > /etc/sudoers.d/rijanos-assistant' << 'EOF'
 # Allow users to run RijanOS Assistant as root without password for autostart
 %sudo ALL=(ALL) NOPASSWD: /opt/rijanos-assistant/rijanos-assistant-root.sh
 
