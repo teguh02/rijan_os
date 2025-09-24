@@ -127,11 +127,49 @@ chmod +x /opt/rijanos-assistant/rijanos-assistant-root.sh
 
 print_header "8a. Configure sudo for autostart..."
 print_status "Adding sudoers rule for RijanOS Assistant autostart..."
-# Create sudoers rule for autostart without password
+# Create sudoers rule for passwordless sudo commands
 sudo tee /etc/sudoers.d/rijanos-assistant > /dev/null << 'EOF'
 # Allow users to run RijanOS Assistant as root without password for autostart
 %sudo ALL=(ALL) NOPASSWD: /opt/rijanos-assistant/rijanos-assistant-root.sh
+
+# Allow passwordless sudo for common system commands used by RijanOS Assistant
+%sudo ALL=(ALL) NOPASSWD: /usr/bin/apt update
+%sudo ALL=(ALL) NOPASSWD: /usr/bin/apt upgrade
+%sudo ALL=(ALL) NOPASSWD: /usr/bin/apt install
+%sudo ALL=(ALL) NOPASSWD: /usr/bin/apt remove
+%sudo ALL=(ALL) NOPASSWD: /usr/bin/apt autoremove
+%sudo ALL=(ALL) NOPASSWD: /usr/bin/apt clean
+%sudo ALL=(ALL) NOPASSWD: /usr/bin/apt show
+%sudo ALL=(ALL) NOPASSWD: /usr/bin/apt search
+%sudo ALL=(ALL) NOPASSWD: /bin/systemctl
+%sudo ALL=(ALL) NOPASSWD: /usr/bin/journalctl
+%sudo ALL=(ALL) NOPASSWD: /bin/rm -rf /tmp/*
+%sudo ALL=(ALL) NOPASSWD: /sbin/reboot
+%sudo ALL=(ALL) NOPASSWD: /sbin/shutdown
+%sudo ALL=(ALL) NOPASSWD: /usr/bin/snap install
+%sudo ALL=(ALL) NOPASSWD: /usr/bin/snap remove
+%sudo ALL=(ALL) NOPASSWD: /usr/bin/flatpak install
+%sudo ALL=(ALL) NOPASSWD: /usr/bin/flatpak remove
+
+# Allow same for admin group
 %admin ALL=(ALL) NOPASSWD: /opt/rijanos-assistant/rijanos-assistant-root.sh
+%admin ALL=(ALL) NOPASSWD: /usr/bin/apt update
+%admin ALL=(ALL) NOPASSWD: /usr/bin/apt upgrade
+%admin ALL=(ALL) NOPASSWD: /usr/bin/apt install
+%admin ALL=(ALL) NOPASSWD: /usr/bin/apt remove
+%admin ALL=(ALL) NOPASSWD: /usr/bin/apt autoremove
+%admin ALL=(ALL) NOPASSWD: /usr/bin/apt clean
+%admin ALL=(ALL) NOPASSWD: /usr/bin/apt show
+%admin ALL=(ALL) NOPASSWD: /usr/bin/apt search
+%admin ALL=(ALL) NOPASSWD: /bin/systemctl
+%admin ALL=(ALL) NOPASSWD: /usr/bin/journalctl
+%admin ALL=(ALL) NOPASSWD: /bin/rm -rf /tmp/*
+%admin ALL=(ALL) NOPASSWD: /sbin/reboot
+%admin ALL=(ALL) NOPASSWD: /sbin/shutdown
+%admin ALL=(ALL) NOPASSWD: /usr/bin/snap install
+%admin ALL=(ALL) NOPASSWD: /usr/bin/snap remove
+%admin ALL=(ALL) NOPASSWD: /usr/bin/flatpak install
+%admin ALL=(ALL) NOPASSWD: /usr/bin/flatpak remove
 EOF
 sudo chmod 440 /etc/sudoers.d/rijanos-assistant
 print_success "Sudoers rule configured for passwordless autostart!"
