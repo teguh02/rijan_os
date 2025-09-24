@@ -51,7 +51,6 @@ logs/
 # Backup files
 *.backup
 *.bak
-backup_*
 
 # Temporary files
 *.tmp
