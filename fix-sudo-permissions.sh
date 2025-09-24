@@ -58,7 +58,7 @@ cat > /etc/sudoers.d/rijanos-assistant << 'EOF'
 
 # Allow passwordless sudo for common system commands used by RijanOS Assistant
 %sudo ALL=(ALL) NOPASSWD: /usr/bin/apt update
-%sudo ALL=(ALL) NOPASSWD: /usr/bin/apt upgrade
+%sudo ALL=(ALL) NOPASSWD: /usr/bin/apt upgrade *
 %sudo ALL=(ALL) NOPASSWD: /usr/bin/apt install *
 %sudo ALL=(ALL) NOPASSWD: /usr/bin/apt remove *
 %sudo ALL=(ALL) NOPASSWD: /usr/bin/apt autoremove *
@@ -74,11 +74,14 @@ cat > /etc/sudoers.d/rijanos-assistant << 'EOF'
 %sudo ALL=(ALL) NOPASSWD: /usr/bin/snap remove *
 %sudo ALL=(ALL) NOPASSWD: /usr/bin/flatpak install *
 %sudo ALL=(ALL) NOPASSWD: /usr/bin/flatpak remove *
+%sudo ALL=(ALL) NOPASSWD: /usr/sbin/do-release-upgrade
+%sudo ALL=(ALL) NOPASSWD: /bin/sh
+%sudo ALL=(ALL) NOPASSWD: /bin/bash
 
 # Allow same for admin group
 %admin ALL=(ALL) NOPASSWD: /opt/rijanos-assistant/rijanos-assistant-root.sh
 %admin ALL=(ALL) NOPASSWD: /usr/bin/apt update
-%admin ALL=(ALL) NOPASSWD: /usr/bin/apt upgrade
+%admin ALL=(ALL) NOPASSWD: /usr/bin/apt upgrade *
 %admin ALL=(ALL) NOPASSWD: /usr/bin/apt install *
 %admin ALL=(ALL) NOPASSWD: /usr/bin/apt remove *
 %admin ALL=(ALL) NOPASSWD: /usr/bin/apt autoremove *
@@ -94,6 +97,9 @@ cat > /etc/sudoers.d/rijanos-assistant << 'EOF'
 %admin ALL=(ALL) NOPASSWD: /usr/bin/snap remove *
 %admin ALL=(ALL) NOPASSWD: /usr/bin/flatpak install *
 %admin ALL=(ALL) NOPASSWD: /usr/bin/flatpak remove *
+%admin ALL=(ALL) NOPASSWD: /usr/sbin/do-release-upgrade
+%admin ALL=(ALL) NOPASSWD: /bin/sh
+%admin ALL=(ALL) NOPASSWD: /bin/bash
 EOF
 
 chmod 440 /etc/sudoers.d/rijanos-assistant
