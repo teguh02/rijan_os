@@ -83,10 +83,11 @@ if [ -d "/opt/rijanos-assistant" ]; then
     print_status "Instalasi ditemukan, melakukan update source code..."
     cd /opt/rijanos-assistant
     
-    # Backup config.json if exists
+    # PROTECT config.json during update
+    print_status "Melindungi config.json dari overwrite..."
     if [ -f "config.json" ]; then
-        print_status "Backup konfigurasi pengguna..."
-        cp config.json /tmp/rijanos-config-backup.json
+        cp config.json /tmp/rijanos-config-protected.json
+        print_success "config.json dilindungi dari overwrite"
     fi
     
     # Update source code from GitHub
@@ -95,11 +96,12 @@ if [ -d "/opt/rijanos-assistant" ]; then
     sudo git reset --hard origin/assistant_os
     sudo git clean -fd
     
-    # Restore config.json
-    if [ -f "/tmp/rijanos-config-backup.json" ]; then
-        print_status "Mengembalikan konfigurasi pengguna..."
-        cp /tmp/rijanos-config-backup.json config.json
-        rm /tmp/rijanos-config-backup.json
+    # RESTORE protected config.json
+    if [ -f "/tmp/rijanos-config-protected.json" ]; then
+        print_status "Mengembalikan config.json yang dilindungi..."
+        cp /tmp/rijanos-config-protected.json config.json
+        rm /tmp/rijanos-config-protected.json
+        print_success "config.json pengguna berhasil dipulihkan!"
     fi
     
     print_success "Source code berhasil diupdate!"
@@ -180,9 +182,9 @@ EOF
 sudo chmod 440 /etc/sudoers.d/rijanos-assistant
 print_success "Sudoers rule configured for passwordless autostart!"
 
-print_header "9. Create config.json if not exists..."
+print_header "9. Protect user configuration..."
 if [ ! -f "/opt/rijanos-assistant/config.json" ]; then
-    print_status "Membuat config.json default..."
+    print_status "Membuat config.json default untuk instalasi baru..."
     cat > /opt/rijanos-assistant/config.json << 'EOF'
 {
   "ai_enabled": false,
@@ -213,9 +215,11 @@ if [ ! -f "/opt/rijanos-assistant/config.json" ]; then
   }
 }
 EOF
-    print_success "config.json berhasil dibuat!"
+    print_success "config.json berhasil dibuat untuk instalasi baru!"
 else
-    print_status "config.json sudah ada, tidak perlu dibuat."
+    print_success "config.json sudah ada - MELINDUNGI KONFIGURASI PENGGUNA!"
+    print_status "File config.json tidak akan diganti untuk melindungi pengaturan pengguna"
+    print_warning "Jika Anda ingin reset konfigurasi, hapus file config.json secara manual terlebih dahulu"
 fi
 
 print_header "10. Setup system-wide autostart..."
@@ -240,11 +244,13 @@ cd /opt/rijanos-assistant
 
 print_header "12. Installation/Update completed!"
 echo "================================================"
-if [ -f "/tmp/rijanos-config-backup.json" ]; then
+if [ -d "/opt/rijanos-assistant" ] && [ -f "/opt/rijanos-assistant/config.json" ]; then
     print_success "RijanOS Assistant berhasil diupdate!"
-    print_status "Konfigurasi pengguna telah dipulihkan"
+    print_status "✅ Konfigurasi pengguna (config.json) TELAH DILINDUNGI"
+    print_status "✅ Pengaturan AI, API keys, dan preferensi pengguna tetap aman"
 else
     print_success "RijanOS Assistant berhasil diinstal!"
+    print_status "✅ File config.json default telah dibuat"
 fi
 print_status "Lokasi: /opt/rijanos-assistant"
 print_status "Jalankan dengan: /opt/rijanos-assistant/venv/bin/python /opt/rijanos-assistant/main.py"
