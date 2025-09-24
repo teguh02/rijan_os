@@ -482,41 +482,59 @@ vim /opt/rijanos-assistant/config.json
 
 ## Autostart pada Login
 
-### Setup Autostart
+### System-wide Autostart (Direkomendasikan)
 
-Untuk menjalankan RijanOS Assistant otomatis saat login:
+RijanOS Assistant dikonfigurasi untuk autostart sebagai root untuk semua pengguna sistem:
 
 ```bash
-# Buat direktori autostart
+# Install autostart untuk semua pengguna sistem
+sudo mkdir -p /etc/xdg/autostart
+sudo cp /opt/rijanos-assistant/rijanos-assistant.desktop /etc/xdg/autostart/
+sudo chmod 644 /etc/xdg/autostart/rijanos-assistant.desktop
+```
+
+**Komponen Autostart:**
+- **Desktop Entry**: `/etc/xdg/autostart/rijanos-assistant.desktop`
+- **Root Wrapper**: `/opt/rijanos-assistant/rijanos-assistant-root.sh`
+- **Sudoers Rule**: `/etc/sudoers.d/rijanos-assistant`
+
+### User-specific Autostart
+
+Untuk setup autostart hanya untuk pengguna tertentu:
+
+```bash
+# Buat direktori autostart pengguna
 mkdir -p ~/.config/autostart
 
-# Buat file desktop entry
-cat > ~/.config/autostart/rijanos-assistant.desktop << EOF
-[Desktop Entry]
-Type=Application
-Exec=python3 /opt/rijanos-assistant/main.py
-Hidden=false
-NoDisplay=false
-X-GNOME-Autostart-enabled=true
-Name=RijanOS Assistant
-Comment=Start RijanOS Assistant on login
-Icon=/opt/rijanos-assistant/assets/logo.png
-EOF
-
-# Set permissions
+# Copy desktop entry
+cp /opt/rijanos-assistant/rijanos-assistant.desktop ~/.config/autostart/
 chmod +x ~/.config/autostart/rijanos-assistant.desktop
 ```
 
 ### Disable Autostart
 
-Untuk menonaktifkan autostart:
+**Disable System-wide:**
+```bash
+# Hapus autostart sistem
+sudo rm /etc/xdg/autostart/rijanos-assistant.desktop
+```
+
+**Disable User-specific:**
+```bash
+# Hapus autostart pengguna
+rm ~/.config/autostart/rijanos-assistant.desktop
+```
+
+### Manual Root Execution
+
+Untuk menjalankan aplikasi sebagai root secara manual:
 
 ```bash
-# Hapus file desktop entry
-rm ~/.config/autostart/rijanos-assistant.desktop
+# Menggunakan wrapper script
+sudo /opt/rijanos-assistant/rijanos-assistant-root.sh
 
-# Atau disable tanpa menghapus
-chmod -x ~/.config/autostart/rijanos-assistant.desktop
+# Atau langsung dengan sudo
+sudo /opt/rijanos-assistant/venv/bin/python /opt/rijanos-assistant/main.py
 ```
 
 ## Penggunaan

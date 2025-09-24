@@ -123,6 +123,18 @@ chmod +x /opt/rijanos-assistant/main.py
 chmod +x /opt/rijanos-assistant/demo.py
 chmod +x /opt/rijanos-assistant/install-or-update.sh
 chmod +x /opt/rijanos-assistant/uninstall.sh
+chmod +x /opt/rijanos-assistant/rijanos-assistant-root.sh
+
+print_header "8a. Configure sudo for autostart..."
+print_status "Adding sudoers rule for RijanOS Assistant autostart..."
+# Create sudoers rule for autostart without password
+sudo tee /etc/sudoers.d/rijanos-assistant > /dev/null << 'EOF'
+# Allow users to run RijanOS Assistant as root without password for autostart
+%sudo ALL=(ALL) NOPASSWD: /opt/rijanos-assistant/rijanos-assistant-root.sh
+%admin ALL=(ALL) NOPASSWD: /opt/rijanos-assistant/rijanos-assistant-root.sh
+EOF
+sudo chmod 440 /etc/sudoers.d/rijanos-assistant
+print_success "Sudoers rule configured for passwordless autostart!"
 
 print_header "9. Create config.json if not exists..."
 if [ ! -f "/opt/rijanos-assistant/config.json" ]; then
@@ -162,16 +174,20 @@ else
     print_status "config.json sudah ada, tidak perlu dibuat."
 fi
 
-print_header "10. Setup autostart (opsional)..."
-printf "Apakah Anda ingin RijanOS Assistant berjalan otomatis saat login? (y/n): "
+print_header "10. Setup system-wide autostart..."
+printf "Apakah Anda ingin RijanOS Assistant berjalan otomatis saat login untuk semua pengguna? (y/n): "
 read -r REPLY
 if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then
-    mkdir -p ~/.config/autostart
-    cp rijanos-assistant.desktop ~/.config/autostart/
-    chmod +x ~/.config/autostart/rijanos-assistant.desktop
-    print_status "Autostart berhasil dikonfigurasi!"
+    # Install to system-wide autostart directory
+    print_status "Menginstall autostart untuk semua pengguna sistem..."
+    sudo mkdir -p /etc/xdg/autostart
+    sudo cp rijanos-assistant.desktop /etc/xdg/autostart/
+    sudo chmod 644 /etc/xdg/autostart/rijanos-assistant.desktop
+    print_success "System-wide autostart berhasil dikonfigurasi!"
+    print_status "RijanOS Assistant akan berjalan otomatis saat login untuk semua pengguna"
 else
-    print_warning "Autostart tidak dikonfigurasi. Anda dapat mengaturnya nanti."
+    print_warning "Autostart tidak dikonfigurasi. Anda dapat mengaturnya nanti dengan:"
+    print_warning "sudo cp /opt/rijanos-assistant/rijanos-assistant.desktop /etc/xdg/autostart/"
 fi
 
 print_header "11. Test installation..."
@@ -188,7 +204,9 @@ else
 fi
 print_status "Lokasi: /opt/rijanos-assistant"
 print_status "Jalankan dengan: /opt/rijanos-assistant/venv/bin/python /opt/rijanos-assistant/main.py"
+print_status "Jalankan sebagai root: sudo /opt/rijanos-assistant/rijanos-assistant-root.sh"
 print_status "Update script: sudo bash /opt/rijanos-assistant/install-or-update.sh"
+print_status "Autostart config: /etc/xdg/autostart/rijanos-assistant.desktop"
 
 echo
 print_status "Fitur yang tersedia:"

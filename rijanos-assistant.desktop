@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Exec=/opt/rijanos-assistant/venv/bin/python /opt/rijanos-assistant/main.py
+Exec=/opt/rijanos-assistant/rijanos-assistant-root.sh
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
