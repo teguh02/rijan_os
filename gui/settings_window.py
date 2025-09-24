@@ -152,14 +152,6 @@ class SettingsWindow(QWidget):
         
         layout.addWidget(ai_group)
         
-        # Test connection
-        test_layout = QHBoxLayout()
-        self.test_connection_btn = QPushButton("🧪 Test Koneksi")
-        self.test_connection_btn.clicked.connect(self.test_ai_connection)
-        test_layout.addWidget(self.test_connection_btn)
-        test_layout.addStretch()
-        
-        layout.addLayout(test_layout)
         layout.addStretch()
         
         self.tab_widget.addTab(ai_widget, "🤖 AI Settings")
@@ -385,7 +377,6 @@ class SettingsWindow(QWidget):
         enabled = state == Qt.CheckState.Checked.value
         self.api_key_edit.setEnabled(enabled)
         self.model_combo.setEnabled(enabled)
-        self.test_connection_btn.setEnabled(enabled)
     
     def on_model_changed(self, model_name):
         """Handler ketika model Gemini diubah"""
@@ -401,16 +392,6 @@ class SettingsWindow(QWidget):
             self.api_key_edit.setEchoMode(QLineEdit.EchoMode.Password)
             self.show_api_key_btn.setText("👁️")
     
-    def test_ai_connection(self):
-        """Test koneksi AI"""
-        api_key = self.api_key_edit.text().strip()
-        
-        if not api_key:
-            QMessageBox.warning(self, "Error", "API key tidak boleh kosong!")
-            return
-        
-        # Simulate test (in real implementation, you would test with Gemini API)
-        QMessageBox.information(self, "Test Koneksi", "Koneksi berhasil! (Simulasi)")
     
     def add_blocked_command(self):
         """Tambah blocked command"""
