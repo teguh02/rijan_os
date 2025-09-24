@@ -387,33 +387,6 @@ class MainWindow(QMainWindow):
         
         security_layout.addLayout(security_buttons_layout)
         
-        # Install all security apps button
-        install_security_btn = QPushButton("🛡️ Install All Security Apps")
-        install_security_btn.setMinimumHeight(50)
-        install_security_btn.setStyleSheet("""
-            QPushButton {
-                font-size: 16px;
-                font-weight: bold;
-                font-family: 'Arial', 'DejaVu Sans', sans-serif;
-                color: #ffffff;
-                padding: 15px;
-                margin: 10px;
-                border: 3px solid #dc3545;
-                border-radius: 10px;
-                background-color: #dc3545;
-                color: white;
-            }
-            QPushButton:hover {
-                background-color: #c82333;
-                border-color: #bd2130;
-            }
-            QPushButton:pressed {
-                background-color: #bd2130;
-            }
-        """)
-        install_security_btn.clicked.connect(lambda: self.install_stack("security_apps"))
-        security_layout.addWidget(install_security_btn)
-        
         layout.addWidget(security_group)
         
         # Security configuration
