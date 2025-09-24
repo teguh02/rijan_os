@@ -65,7 +65,7 @@ fi
 print_header "4. Create virtual environment..."
 cd /tmp
 python3 -m venv rijanos-venv
-source rijanos-venv/bin/activate
+. rijanos-venv/bin/activate
 
 print_header "5. Install Python packages in virtual environment..."
 # Install core packages
