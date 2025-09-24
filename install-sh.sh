@@ -77,7 +77,39 @@ chmod +x /opt/rijanos-assistant/uninstall.sh
 print_header "7. Create config.json if not exists..."
 if [ ! -f "/opt/rijanos-assistant/config.json" ]; then
     print_status "Membuat config.json default..."
-    # Config will be created on first run
+    cat > /opt/rijanos-assistant/config.json << 'EOF'
+{
+  "ai_enabled": false,
+  "gemini_api_key": "",
+  "gemini_model": "gemini-2.5-flash-lite",
+  "console_visible": true,
+  "blocked_commands": [
+    "rm -rf /",
+    "mkfs",
+    "dd if=",
+    ":(){ :|: & };:",
+    "sudo rm -rf /",
+    "format",
+    "fdisk",
+    "parted"
+  ],
+  "apt_commands": {
+    "python_stack": "sudo apt install -y python3 python3-pip python3-venv jupyter-notebook python3-numpy python3-pandas python3-matplotlib",
+    "php_stack": "sudo apt install -y php composer",
+    "node_stack": "sudo apt install -y nodejs npm yarnpkg",
+    "golang_stack": "sudo apt install -y golang",
+    "media_tools": "sudo apt install -y vlc gimp audacity obs-studio",
+    "education_apps": "sudo apt install -y stellarium texstudio texlive-full",
+    "developer_apps": "sudo apt install -y git code docker.io postman",
+    "system_apps": "sudo apt install -y htop gparted curl wget",
+    "multimedia_apps": "sudo apt install -y audacity vlc gimp obs-studio kdenlive blender",
+    "security_apps": "sudo apt install -y clamav clamav-daemon ufw fail2ban rkhunter chkrootkit lynis"
+  }
+}
+EOF
+    print_success "config.json berhasil dibuat!"
+else
+    print_status "config.json sudah ada, tidak perlu dibuat."
 fi
 
 print_header "8. Setup autostart (opsional)..."
