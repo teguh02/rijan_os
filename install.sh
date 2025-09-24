@@ -52,17 +52,37 @@ fi
 print_header "1. Update sistem..."
 sudo apt update && sudo apt upgrade -y
 
-print_header "2. Install dependencies..."
-sudo apt install -y python3 python3-pip python3-venv git python3-pyqt6 python3-pyqt6.qtwidgets
+print_header "2. Install system dependencies..."
+sudo apt install -y python3 python3-pip python3-venv git
 
-print_header "3. Install Python packages..."
-pip3 install requests httpx
+print_header "3. Try to install PyQt6 from system packages..."
+if sudo apt install -y python3-pyqt6 python3-pyqt6.qtwidgets 2>/dev/null; then
+    print_success "PyQt6 berhasil diinstal dari system packages"
+else
+    print_warning "PyQt6 system packages tidak tersedia, akan install via pip"
+fi
 
-print_header "4. Create application directory..."
+print_header "4. Install Python packages..."
+# Install core packages
+pip3 install --user requests
+
+# Try to install PyQt6 via pip if system packages failed
+if ! python3 -c "import PyQt6" 2>/dev/null; then
+    print_status "Installing PyQt6 via pip..."
+    pip3 install --user PyQt6
+fi
+
+# Install google-genai for AI features
+if ! python3 -c "import google.genai" 2>/dev/null; then
+    print_status "Installing google-genai via pip..."
+    pip3 install --user google-genai
+fi
+
+print_header "5. Create application directory..."
 sudo mkdir -p /opt/rijanos-assistant
 sudo chown -R $USER:$USER /opt/rijanos-assistant
 
-print_header "5. Copy application files..."
+print_header "6. Copy application files..."
 if [ -d "/opt/rijanos-assistant" ]; then
     # Copy current directory contents to /opt/rijanos-assistant
     cp -r . /opt/rijanos-assistant/
@@ -72,13 +92,13 @@ else
     exit 1
 fi
 
-print_header "6. Set permissions..."
+print_header "7. Set permissions..."
 chmod +x /opt/rijanos-assistant/main.py
 chmod +x /opt/rijanos-assistant/demo.py
 chmod +x /opt/rijanos-assistant/install.sh
 chmod +x /opt/rijanos-assistant/uninstall.sh
 
-print_header "7. Create config.json if not exists..."
+print_header "8. Create config.json if not exists..."
 if [ ! -f "/opt/rijanos-assistant/config.json" ]; then
     print_status "Membuat config.json default..."
     cat > /opt/rijanos-assistant/config.json << 'EOF'
@@ -116,7 +136,7 @@ else
     print_status "config.json sudah ada, tidak perlu dibuat."
 fi
 
-print_header "8. Setup autostart (opsional)..."
+print_header "9. Setup autostart (opsional)..."
 printf "Apakah Anda ingin RijanOS Assistant berjalan otomatis saat login? (y/n): "
 read -r REPLY
 if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then
@@ -128,11 +148,11 @@ else
     print_warning "Autostart tidak dikonfigurasi. Anda dapat mengaturnya nanti."
 fi
 
-print_header "9. Test installation..."
+print_header "10. Test installation..."
 cd /opt/rijanos-assistant
 python3 demo.py
 
-print_header "10. Installation completed!"
+print_header "11. Installation completed!"
 echo "=============================================="
 print_status "RijanOS Assistant berhasil diinstal!"
 print_status "Lokasi: /opt/rijanos-assistant"
