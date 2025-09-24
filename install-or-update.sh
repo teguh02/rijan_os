@@ -1,12 +1,12 @@
 #!/bin/bash
-# RijanOS Assistant - Installation Script
-# Script instalasi otomatis untuk RijanOS Assistant
+# RijanOS Assistant - Installation & Update Script
+# Script instalasi dan update otomatis untuk RijanOS Assistant
 # Compatible with both sh and bash
 
 set -e  # Exit on any error
 
-echo "🚀 RijanOS Assistant - Installation Script"
-echo "=============================================="
+echo "🚀 RijanOS Assistant - Installation & Update Script"
+echo "===================================================="
 
 # Colors for output
 RED='\033[0;31m'
@@ -77,17 +77,39 @@ pip install google-genai
 
 print_status "Virtual environment created at: /tmp/rijanos-venv"
 
-print_header "6. Clone repository to /opt/rijanos-assistant..."
-# Remove existing directory if it exists
+print_header "6. Install or update RijanOS Assistant..."
+# Check if installation exists
 if [ -d "/opt/rijanos-assistant" ]; then
-    print_status "Menghapus instalasi lama..."
-    sudo rm -rf /opt/rijanos-assistant
+    print_status "Instalasi ditemukan, melakukan update source code..."
+    cd /opt/rijanos-assistant
+    
+    # Backup config.json if exists
+    if [ -f "config.json" ]; then
+        print_status "Backup konfigurasi pengguna..."
+        cp config.json /tmp/rijanos-config-backup.json
+    fi
+    
+    # Update source code from GitHub
+    print_status "Mengambil update terbaru dari GitHub..."
+    sudo git fetch origin assistant_os
+    sudo git reset --hard origin/assistant_os
+    sudo git clean -fd
+    
+    # Restore config.json
+    if [ -f "/tmp/rijanos-config-backup.json" ]; then
+        print_status "Mengembalikan konfigurasi pengguna..."
+        cp /tmp/rijanos-config-backup.json config.json
+        rm /tmp/rijanos-config-backup.json
+    fi
+    
+    print_success "Source code berhasil diupdate!"
+else
+    print_status "Instalasi baru, cloning repository dari GitHub..."
+    # Clone repository directly from assistant_os branch
+    sudo git clone -b assistant_os https://github.com/teguh02/rijan_os.git /opt/rijanos-assistant
+    cd /opt/rijanos-assistant
+    print_success "Repository berhasil di-clone!"
 fi
-
-# Clone repository directly from assistant_os branch
-print_status "Cloning repository dari GitHub (branch assistant_os)..."
-sudo git clone -b assistant_os https://github.com/teguh02/rijan_os.git /opt/rijanos-assistant
-cd /opt/rijanos-assistant
 
 # Set ownership to current user
 sudo chown -R $USER:$USER /opt/rijanos-assistant
@@ -99,7 +121,7 @@ cp -r /tmp/rijanos-venv /opt/rijanos-assistant/venv
 print_header "8. Set permissions..."
 chmod +x /opt/rijanos-assistant/main.py
 chmod +x /opt/rijanos-assistant/demo.py
-chmod +x /opt/rijanos-assistant/install.sh
+chmod +x /opt/rijanos-assistant/install-or-update.sh
 chmod +x /opt/rijanos-assistant/uninstall.sh
 
 print_header "9. Create config.json if not exists..."
@@ -156,11 +178,17 @@ print_header "11. Test installation..."
 cd /opt/rijanos-assistant
 /opt/rijanos-assistant/venv/bin/python demo.py
 
-print_header "12. Installation completed!"
-echo "=============================================="
-print_status "RijanOS Assistant berhasil diinstal!"
+print_header "12. Installation/Update completed!"
+echo "================================================"
+if [ -f "/tmp/rijanos-config-backup.json" ]; then
+    print_success "RijanOS Assistant berhasil diupdate!"
+    print_status "Konfigurasi pengguna telah dipulihkan"
+else
+    print_success "RijanOS Assistant berhasil diinstal!"
+fi
 print_status "Lokasi: /opt/rijanos-assistant"
 print_status "Jalankan dengan: /opt/rijanos-assistant/venv/bin/python /opt/rijanos-assistant/main.py"
+print_status "Update script: sudo bash /opt/rijanos-assistant/install-or-update.sh"
 
 echo
 print_status "Fitur yang tersedia:"

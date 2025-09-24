@@ -34,9 +34,28 @@
 - **CPU**: x86_64 architecture
 - **Display**: 1024x768 atau lebih tinggi
 
-## Instalasi
+## 📥 Instalasi & Update
 
-### Langkah 1: Update Sistem
+### Metode 1: Instalasi/Update Otomatis (Direkomendasikan)
+
+Script `install-or-update.sh` dapat melakukan instalasi baru atau update source code secara otomatis:
+
+```bash
+# Download dan jalankan script instalasi/update
+wget https://raw.githubusercontent.com/teguh02/rijan_os/assistant_os/install-or-update.sh
+chmod +x install-or-update.sh
+sudo ./install-or-update.sh
+```
+
+**Fitur Script:**
+- ✅ **Instalasi Baru**: Clone repository dan setup lengkap
+- ✅ **Update Otomatis**: Deteksi instalasi existing dan update source code
+- ✅ **Backup Konfigurasi**: Preserve pengaturan pengguna saat update
+- ✅ **Virtual Environment**: Setup Python environment terisolasi
+
+### Metode 2: Instalasi Manual
+
+#### Langkah 1: Update Sistem
 
 Pastikan sistem Rijan OS Anda ter-update:
 
@@ -44,7 +63,7 @@ Pastikan sistem Rijan OS Anda ter-update:
 sudo apt update && sudo apt upgrade -y
 ```
 
-### Langkah 2: Install Dependencies
+#### Langkah 2: Install Dependencies
 
 Install Python dan dependencies yang diperlukan:
 
@@ -59,17 +78,13 @@ sudo apt install -y python3-pyqt6 python3-pyqt6.qtwidgets
 pip3 install requests httpx
 ```
 
-### Langkah 3: Clone Repository
+#### Langkah 3: Clone Repository
 
 Clone atau copy source code RijanOS Assistant:
 
 ```bash
-# Buat direktori untuk aplikasi
-sudo mkdir -p /opt/rijanos-assistant
-cd /opt/rijanos-assistant
-
-# Clone repository
-sudo git clone https://github.com/teguh02/rijan_os .
+# Clone repository langsung ke /opt/rijanos-assistant
+sudo git clone -b assistant_os https://github.com/teguh02/rijan_os.git /opt/rijanos-assistant
 
 # Set permissions
 sudo chown -R $USER:$USER /opt/rijanos-assistant
@@ -96,6 +111,56 @@ Jalankan aplikasi untuk pertama kali:
 ```bash
 cd /opt/rijanos-assistant
 python3 main.py
+```
+
+## 🔄 Update Source Code
+
+### Update Otomatis (Direkomendasikan)
+
+Jika Anda menginstal menggunakan `install-or-update.sh`, jalankan script yang sama untuk update:
+
+```bash
+# Jalankan script update
+sudo /opt/rijanos-assistant/install-or-update.sh
+```
+
+Script akan:
+1. **Backup** konfigurasi pengguna (`config.json`)
+2. **Fetch** update terbaru dari GitHub
+3. **Reset** source code ke versi terbaru
+4. **Restore** konfigurasi pengguna
+5. **Update** virtual environment jika diperlukan
+
+### Update Manual
+
+Jika Anda ingin melakukan update manual:
+
+```bash
+cd /opt/rijanos-assistant
+
+# Backup konfigurasi
+cp config.json /tmp/rijanos-config-backup.json
+
+# Update source code
+sudo git fetch origin assistant_os
+sudo git reset --hard origin/assistant_os
+sudo git clean -fd
+
+# Restore konfigurasi
+cp /tmp/rijanos-config-backup.json config.json
+
+# Update permissions
+sudo chown -R $USER:$USER /opt/rijanos-assistant
+```
+
+### Verifikasi Update
+
+Setelah update, pastikan aplikasi berjalan dengan baik:
+
+```bash
+cd /opt/rijanos-assistant
+python3 demo.py  # Test basic functionality
+python3 main.py  # Run full application
 ```
 
 ## Instalasi untuk Developer
@@ -209,7 +274,7 @@ rijan_os/
 ├── DOCUMENTATION.md       # This file
 ├── DEVELOPER_GUIDE.md     # Developer guide
 ├── CHANGELOG.md           # Change log
-└── install.sh            # Installation script
+└── install-or-update.sh  # Installation & Update script
 ```
 
 ### Development Workflow
