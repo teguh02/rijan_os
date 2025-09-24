@@ -6,7 +6,7 @@ Menangani system tray icon dan menu
 import sys
 import os
 from PyQt6.QtWidgets import (
-    QSystemTrayIcon, QMenu, QMessageBox, QInputDialog, QWidget
+    QSystemTrayIcon, QMenu, QMessageBox, QInputDialog, QWidget, QApplication
 )
 from PyQt6.QtCore import QTimer, pyqtSignal, Qt
 from PyQt6.QtGui import QIcon, QPixmap, QAction
@@ -42,9 +42,16 @@ class SystemTray(QSystemTrayIcon):
                 self.setIcon(QIcon(icon_path))
             else:
                 # Gunakan icon default PyQt6
-                self.setIcon(self.style().standardIcon(self.style().StandardPixmap.SP_ComputerIcon))
-        except:
-            self.setIcon(self.style().standardIcon(self.style().StandardPixmap.SP_ComputerIcon))
+                app = QApplication.instance()
+                if app:
+                    self.setIcon(app.style().standardIcon(app.style().StandardPixmap.SP_ComputerIcon))
+                else:
+                    # Fallback ke icon kosong jika tidak ada QApplication
+                    self.setIcon(QIcon())
+        except Exception as e:
+            print(f"Warning: Could not set system tray icon: {e}")
+            # Fallback ke icon kosong
+            self.setIcon(QIcon())
         
         # Set tooltip
         self.setToolTip("RijanOS Assistant")
