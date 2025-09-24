@@ -32,15 +32,19 @@ print_header() {
     echo -e "${BLUE}[STEP]${NC} $1"
 }
 
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
 # Check if running as root
-if [ "$EUID" -eq 0 ]; then
+if [ "$(id -u)" -eq 0 ]; then
     print_error "Jangan jalankan script ini sebagai root!"
     print_warning "Jalankan sebagai user biasa, script akan meminta sudo jika diperlukan."
     exit 1
 fi
 
 # Check if running on Rijan OS or Ubuntu
-if ! command -v apt &> /dev/null; then
+if ! command -v apt >/dev/null 2>&1; then
     print_error "Script ini hanya untuk sistem berbasis Debian/Ubuntu!"
     exit 1
 fi

@@ -32,6 +32,10 @@ print_header() {
     echo "${BLUE}[STEP]${NC} $1"
 }
 
+print_success() {
+    echo "${GREEN}[SUCCESS]${NC} $1"
+}
+
 # Check if running as root
 if [ "$(id -u)" -eq 0 ]; then
     print_error "Jangan jalankan script ini sebagai root!"
