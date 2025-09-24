@@ -69,7 +69,7 @@ sudo mkdir -p /opt/rijanos-assistant
 cd /opt/rijanos-assistant
 
 # Clone repository
-sudo git clone https://github.com/teguh02/rijan_os_assistant.git .
+sudo git clone https://github.com/teguh02/rijan_os .
 
 # Set permissions
 sudo chown -R $USER:$USER /opt/rijanos-assistant

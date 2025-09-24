@@ -36,12 +36,6 @@ print_success() {
     echo -e "${GREEN}[SUCCESS]${NC} $1"
 }
 
-# Check if running as root
-if [ "$(id -u)" -eq 0 ]; then
-    print_error "Jangan jalankan script ini sebagai root!"
-    print_warning "Jalankan sebagai user biasa, script akan meminta sudo jika diperlukan."
-    exit 1
-fi
 
 # Check if running on Rijan OS or Ubuntu
 if ! command -v apt >/dev/null 2>&1; then

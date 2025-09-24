@@ -5,7 +5,7 @@
 ### Linux/Rijan OS
 ```bash
 # Clone repository
-git clone https://github.com/teguh02/rijan_os_assistant.git
+git clone https://github.com/teguh02/rijan_os
 cd rijan_os_assistant
 
 # Jalankan script instalasi
