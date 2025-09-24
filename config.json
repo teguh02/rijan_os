@@ -1,0 +1,28 @@
+{
+  "ai_enabled": true,
+  "gemini_api_key": "AIzaSyA12NaM3UrJE_AMogAAlWDJ2x8mM1Ixtfo",
+  "gemini_model": "gemini-2.5-flash",
+  "console_visible": true,
+  "blocked_commands": [
+    "rm -rf /",
+    "mkfs",
+    "dd if=",
+    ":(){ :|: & };:",
+    "sudo rm -rf /",
+    "format",
+    "fdisk",
+    "parted"
+  ],
+  "apt_commands": {
+    "python_stack": "sudo apt install -y python3 python3-pip python3-venv jupyter-notebook python3-numpy python3-pandas python3-matplotlib",
+    "php_stack": "sudo apt install -y php composer",
+    "node_stack": "sudo apt install -y nodejs npm yarnpkg",
+    "golang_stack": "sudo apt install -y golang",
+    "media_tools": "sudo apt install -y vlc gimp audacity obs-studio",
+    "education_apps": "sudo apt install -y stellarium texstudio texlive-full",
+    "developer_apps": "sudo apt install -y git code docker.io postman",
+    "system_apps": "sudo apt install -y htop gparted curl wget",
+    "multimedia_apps": "sudo apt install -y audacity vlc gimp obs-studio kdenlive blender",
+    "security_apps": "sudo apt install -y clamav clamav-daemon ufw fail2ban rkhunter chkrootkit lynis"
+  }
+}

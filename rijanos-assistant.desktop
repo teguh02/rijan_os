@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Exec=python3 /opt/rijanos-assistant/main.py
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name=RijanOS Assistant
+Comment=Start RijanOS Assistant on login
+Icon=/opt/rijanos-assistant/assets/logo.png
+Categories=System;Utility;
+Keywords=assistant;system;management;rijanos;
+StartupNotify=true
