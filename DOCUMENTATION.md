@@ -98,6 +98,265 @@ cd /opt/rijanos-assistant
 python3 main.py
 ```
 
+## Instalasi untuk Developer
+
+### Langkah 1: Clone Repository
+
+Clone repository dari GitHub:
+
+```bash
+# Clone repository
+git clone https://github.com/teguh02/rijan_os.git
+cd rijan_os
+
+# Checkout ke branch assistant_os
+git checkout assistant_os
+```
+
+### Langkah 2: Setup Virtual Environment
+
+Buat dan aktifkan virtual environment:
+
+```bash
+# Buat virtual environment
+python3 -m venv venv
+
+# Aktifkan virtual environment
+# Untuk Linux/macOS:
+source venv/bin/activate
+
+# Untuk Windows:
+venv\Scripts\activate
+```
+
+### Langkah 3: Install Dependencies
+
+Install dependencies yang diperlukan:
+
+```bash
+# Install dependencies dari requirements.txt
+pip install -r requirements.txt
+
+# Untuk development, install dependencies tambahan
+pip install pytest flake8 black isort
+```
+
+### Langkah 4: Setup Development Environment
+
+```bash
+# Copy dan edit config untuk development
+cp config.json config.dev.json
+
+# Edit config untuk development (opsional)
+nano config.dev.json
+```
+
+### Langkah 5: Run Development Server
+
+```bash
+# Jalankan aplikasi dalam mode development
+python main.py
+
+# Atau dengan config khusus
+python main.py --config config.dev.json
+```
+
+### Langkah 6: Setup Git Hooks (Opsional)
+
+```bash
+# Setup pre-commit hooks untuk code quality
+cat > .git/hooks/pre-commit << 'EOF'
+#!/bin/bash
+echo "Running pre-commit checks..."
+
+# Format code with black
+black --check .
+
+# Sort imports
+isort --check-only .
+
+# Lint with flake8
+flake8 .
+
+echo "Pre-commit checks passed!"
+EOF
+
+chmod +x .git/hooks/pre-commit
+```
+
+### Struktur Project untuk Developer
+
+```
+rijan_os/
+├── core/                    # Core modules
+│   ├── __init__.py
+│   ├── command_executor.py  # Command execution with safety
+│   ├── package_manager.py   # Package management
+│   └── system_tools.py      # System tools and utilities
+├── gui/                     # GUI modules
+│   ├── __init__.py
+│   ├── main_window.py       # Main application window
+│   ├── ai_chat_window.py    # AI chat interface
+│   ├── settings_window.py   # Settings window
+│   └── system_tray.py       # System tray functionality
+├── assets/                  # Static assets
+│   ├── __init__.py
+│   └── logo.png            # Application logo
+├── main.py                  # Application entry point
+├── config.json             # Default configuration
+├── requirements.txt        # Python dependencies
+├── README.md              # Project README
+├── DOCUMENTATION.md       # This file
+├── DEVELOPER_GUIDE.md     # Developer guide
+├── CHANGELOG.md           # Change log
+└── install.sh            # Installation script
+```
+
+### Development Workflow
+
+#### 1. Feature Development
+
+```bash
+# Create feature branch
+git checkout -b feature/new-feature
+
+# Make changes
+# ... edit files ...
+
+# Test changes
+python main.py
+
+# Commit changes
+git add .
+git commit -m "feat: add new feature"
+
+# Push to GitHub
+git push origin feature/new-feature
+```
+
+#### 2. Code Quality
+
+```bash
+# Format code
+black .
+
+# Sort imports
+isort .
+
+# Lint code
+flake8 .
+
+# Run tests (if available)
+pytest
+```
+
+#### 3. Configuration for Development
+
+Edit `config.json` untuk development:
+
+```json
+{
+  "ai_enabled": true,
+  "gemini_api_key": "YOUR_DEVELOPMENT_API_KEY",
+  "gemini_model": "gemini-2.5-flash-lite",
+  "console_visible": true,
+  "debug_mode": true,
+  "log_level": "DEBUG"
+}
+```
+
+#### 4. Testing AI Features
+
+```bash
+# Test dengan API key development
+export GEMINI_API_KEY="your_dev_api_key"
+python main.py
+
+# Test tanpa AI (offline mode)
+python main.py --no-ai
+```
+
+### Developer Tools & Commands
+
+#### Useful Development Commands
+
+```bash
+# Check Python syntax
+python -m py_compile main.py
+
+# Check imports
+python -c "import main; print('All imports OK')"
+
+# Generate requirements.txt
+pip freeze > requirements.txt
+
+# Create distribution
+python setup.py sdist bdist_wheel
+
+# Install in development mode
+pip install -e .
+```
+
+#### Debugging
+
+```bash
+# Run with debug mode
+python main.py --debug
+
+# Run with verbose logging
+python main.py --verbose
+
+# Run specific module
+python -m gui.ai_chat_window
+
+# Profile performance
+python -m cProfile main.py
+```
+
+### Contributing Guidelines
+
+1. **Fork** repository di GitHub
+2. **Clone** fork Anda ke local machine
+3. **Create** feature branch dari `assistant_os`
+4. **Make** changes dan test thoroughly
+5. **Commit** dengan conventional commit messages
+6. **Push** ke fork Anda
+7. **Create** Pull Request ke branch `assistant_os`
+
+### API Key untuk Development
+
+Untuk development dengan AI features:
+
+1. Dapatkan API key dari: https://aistudio.google.com/apikey
+2. Set di environment variable:
+   ```bash
+   export GEMINI_API_KEY="your_api_key_here"
+   ```
+3. Atau edit `config.json`:
+   ```json
+   {
+     "gemini_api_key": "your_api_key_here"
+   }
+   ```
+
+**⚠️ Penting**: Jangan commit API key ke repository!
+
+### Deployment untuk Developer
+
+```bash
+# Build untuk production
+python -m build
+
+# Test installation
+pip install dist/rijanos-assistant-*.whl
+
+# Create installer
+./create_installer.sh
+
+# Deploy to test server
+./deploy.sh --env staging
+```
+
 ## Konfigurasi
 
 ### File config.json
