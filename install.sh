@@ -6,13 +6,19 @@
 
 set -e  # Exit on any error
 
-# Check if we have bash available, if not continue with sh
-if command -v bash >/dev/null 2>&1; then
-    # Re-execute with bash if available for better compatibility
-    if [ "$0" != "/bin/bash" ] && [ "$0" != "/usr/bin/bash" ]; then
-        exec bash "$0" "$@"
-    fi
+# Show initial message
+echo "Starting Rijan OS Welcome Screen Installation..."
+echo "=============================================="
+
+# Check if verbose mode is requested
+VERBOSE=false
+if [ "$1" = "-v" ] || [ "$1" = "--verbose" ]; then
+    VERBOSE=true
+    echo "Verbose mode enabled"
 fi
+
+# Add timeout for long operations
+TIMEOUT=300  # 5 minutes timeout
 
 # Colors for output
 RED='\033[0;31m'
@@ -38,6 +44,29 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# Function to run command with timeout
+run_with_timeout() {
+    local cmd="$1"
+    local timeout="${2:-$TIMEOUT}"
+    
+    if [ "$VERBOSE" = "true" ]; then
+        echo "Running: $cmd"
+        timeout "$timeout" sh -c "$cmd"
+    else
+        timeout "$timeout" sh -c "$cmd" 2>/dev/null
+    fi
+    
+    local exit_code=$?
+    if [ $exit_code -eq 124 ]; then
+        print_error "Command timed out after $timeout seconds"
+        return 1
+    elif [ $exit_code -ne 0 ]; then
+        print_error "Command failed with exit code $exit_code"
+        return $exit_code
+    fi
+    return 0
+}
+
 # Check if running as root
 check_root() {
     if [ "$(id -u)" -ne 0 ]; then
@@ -49,14 +78,15 @@ check_root() {
 # Install system dependencies
 install_dependencies() {
     print_info "Installing system dependencies..."
+    echo "This may take a few minutes..."
     
     # Update package list
-    apt update
+    print_info "Updating package list..."
+    run_with_timeout "apt update" 120
     
     # Install Python and required packages
-    apt install -y python3 python3-pip python3-venv python3-tk \
-                   libjpeg-dev libpng-dev libtiff-dev libfreetype6-dev \
-                   python3-pil python3-pil.imagetk
+    print_info "Installing Python and dependencies..."
+    run_with_timeout "apt install -y python3 python3-pip python3-venv python3-tk libjpeg-dev libpng-dev libtiff-dev libfreetype6-dev python3-pil python3-pil.imagetk" 300
     
     print_success "System dependencies installed"
 }
@@ -66,20 +96,25 @@ setup_application() {
     print_info "Setting up Rijan OS Welcome Screen..."
     
     # Create application directory
+    print_info "Creating application directory..."
     mkdir -p /opt/rijan-os-welcome
     
     # Copy files
+    print_info "Copying application files..."
     cp -r . /opt/rijan-os-welcome/
     cd /opt/rijan-os-welcome
     
     # Create virtual environment
+    print_info "Creating Python virtual environment..."
     python3 -m venv venv
     . venv/bin/activate
     
     # Install Python dependencies
+    print_info "Installing Python dependencies..."
     pip install -r requirements.txt
     
     # Set permissions
+    print_info "Setting file permissions..."
     chmod +x main.py
     chown -R root:root /opt/rijan-os-welcome
     
@@ -193,14 +228,22 @@ main() {
     echo
     
     # Check prerequisites
+    print_info "Checking prerequisites..."
     check_root
     
-    # Install components
+    # Install components with progress feedback
+    echo "Installation steps:"
+    echo "1. Installing system dependencies..."
     install_dependencies
+    echo "2. Setting up application..."
     setup_application
+    echo "3. Creating launcher script..."
     create_launcher
+    echo "4. Creating systemd service..."
     create_service
+    echo "5. Creating desktop entry..."
     create_desktop_entry
+    echo "6. Testing installation..."
     test_installation
     
     echo
@@ -237,10 +280,16 @@ case "${1:-install}" in
         test_installation
         ;;
     *)
-        echo "Usage: $0 {install|uninstall|test}"
+        echo "Usage: $0 {install|uninstall|test} [-v|--verbose]"
         echo "  install   - Install the welcome screen (default)"
         echo "  uninstall - Remove the welcome screen"
         echo "  test      - Test the installation"
+        echo "  -v, --verbose - Enable verbose output"
+        echo ""
+        echo "Examples:"
+        echo "  sudo sh install.sh"
+        echo "  sudo sh install.sh install -v"
+        echo "  sudo sh install.sh uninstall"
         exit 1
         ;;
 esac
