@@ -77,31 +77,32 @@ pip install google-genai
 
 print_status "Virtual environment created at: /tmp/rijanos-venv"
 
-print_header "6. Create application directory..."
-sudo mkdir -p /opt/rijanos-assistant
+print_header "6. Clone repository to /opt/rijanos-assistant..."
+# Remove existing directory if it exists
+if [ -d "/opt/rijanos-assistant" ]; then
+    print_status "Menghapus instalasi lama..."
+    sudo rm -rf /opt/rijanos-assistant
+fi
+
+# Clone repository directly from assistant_os branch
+print_status "Cloning repository dari GitHub (branch assistant_os)..."
+sudo git clone -b assistant_os https://github.com/teguh02/rijan_os.git /opt/rijanos-assistant
+cd /opt/rijanos-assistant
+
+# Set ownership to current user
 sudo chown -R $USER:$USER /opt/rijanos-assistant
 
-print_header "7. Copy virtual environment and application files..."
+print_header "7. Copy virtual environment to application directory..."
 # Copy virtual environment to application directory
 cp -r /tmp/rijanos-venv /opt/rijanos-assistant/venv
 
-print_header "8. Copy application files..."
-if [ -d "/opt/rijanos-assistant" ]; then
-    # Copy current directory contents to /opt/rijanos-assistant
-    cp -r . /opt/rijanos-assistant/
-    cd /opt/rijanos-assistant
-else
-    print_error "Direktori /opt/rijanos-assistant tidak ditemukan!"
-    exit 1
-fi
-
-print_header "9. Set permissions..."
+print_header "8. Set permissions..."
 chmod +x /opt/rijanos-assistant/main.py
 chmod +x /opt/rijanos-assistant/demo.py
 chmod +x /opt/rijanos-assistant/install.sh
 chmod +x /opt/rijanos-assistant/uninstall.sh
 
-print_header "10. Create config.json if not exists..."
+print_header "9. Create config.json if not exists..."
 if [ ! -f "/opt/rijanos-assistant/config.json" ]; then
     print_status "Membuat config.json default..."
     cat > /opt/rijanos-assistant/config.json << 'EOF'
@@ -139,7 +140,7 @@ else
     print_status "config.json sudah ada, tidak perlu dibuat."
 fi
 
-print_header "11. Setup autostart (opsional)..."
+print_header "10. Setup autostart (opsional)..."
 printf "Apakah Anda ingin RijanOS Assistant berjalan otomatis saat login? (y/n): "
 read -r REPLY
 if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then
@@ -151,11 +152,11 @@ else
     print_warning "Autostart tidak dikonfigurasi. Anda dapat mengaturnya nanti."
 fi
 
-print_header "12. Test installation..."
+print_header "11. Test installation..."
 cd /opt/rijanos-assistant
 /opt/rijanos-assistant/venv/bin/python demo.py
 
-print_header "13. Installation completed!"
+print_header "12. Installation completed!"
 echo "=============================================="
 print_status "RijanOS Assistant berhasil diinstal!"
 print_status "Lokasi: /opt/rijanos-assistant"
