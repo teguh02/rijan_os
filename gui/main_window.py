@@ -87,6 +87,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("RijanOS Assistant v1.0")
         self.setGeometry(100, 100, 1000, 700)
         
+        # Set application icon
+        self.set_application_icon()
+        
         # Set style
         self.setStyleSheet("""
             QMainWindow {
@@ -2059,3 +2062,34 @@ echo "✅ Sources berhasil dikembalikan dari backup!"
         """Get current timestamp for backup naming"""
         from datetime import datetime
         return datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    def set_application_icon(self):
+        """Set application icon from logo.png"""
+        try:
+            # Try different possible paths for logo.png
+            possible_paths = [
+                "assets/logo.png",
+                os.path.join(os.path.dirname(__file__), "..", "assets", "logo.png"),
+                os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "logo.png"),
+                "/opt/rijanos-assistant/assets/logo.png"
+            ]
+            
+            icon_path = None
+            for path in possible_paths:
+                if os.path.exists(path):
+                    icon_path = path
+                    break
+            
+            if icon_path:
+                # Set window icon
+                self.setWindowIcon(QIcon(icon_path))
+                print(f"✅ Application icon set from: {icon_path}")
+            else:
+                print("⚠️ Warning: logo.png not found, using default icon")
+                # Use default icon as fallback
+                self.setWindowIcon(QIcon())
+                
+        except Exception as e:
+            print(f"⚠️ Warning: Could not set application icon: {e}")
+            # Use default icon as fallback
+            self.setWindowIcon(QIcon())

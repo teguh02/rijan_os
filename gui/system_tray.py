@@ -37,10 +37,25 @@ class SystemTray(QSystemTrayIcon):
         """Inisialisasi UI system tray"""
         # Set icon (gunakan icon default jika logo.png tidak ada)
         try:
-            icon_path = os.path.join("assets", "logo.png")
-            if os.path.exists(icon_path):
+            # Try different possible paths for logo.png
+            possible_paths = [
+                "assets/logo.png",
+                os.path.join(os.path.dirname(__file__), "..", "assets", "logo.png"),
+                os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "logo.png"),
+                "/opt/rijanos-assistant/assets/logo.png"
+            ]
+            
+            icon_path = None
+            for path in possible_paths:
+                if os.path.exists(path):
+                    icon_path = path
+                    break
+            
+            if icon_path:
                 self.setIcon(QIcon(icon_path))
+                print(f"✅ System tray icon set from: {icon_path}")
             else:
+                print("⚠️ Warning: logo.png not found for system tray, using default icon")
                 # Gunakan icon default PyQt6
                 app = QApplication.instance()
                 if app:
