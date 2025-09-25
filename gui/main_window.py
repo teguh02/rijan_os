@@ -157,6 +157,9 @@ class MainWindow(QMainWindow):
         
         # Output area
         self.create_output_area(main_layout)
+        
+        # Check sudo status after output area is created
+        self.check_and_display_sudo_status()
     
     def create_dashboard_tab(self):
         """Membuat tab Dashboard"""
@@ -991,9 +994,6 @@ class MainWindow(QMainWindow):
         
         # Load current status
         self.refresh_repo_status()
-        
-        # Check and display sudo status
-        self.check_and_display_sudo_status()
         
         layout.addStretch()
         
@@ -2081,6 +2081,11 @@ echo "✅ Sources berhasil dikembalikan dari backup!"
     def check_and_display_sudo_status(self):
         """Check and display sudo status in repository tab"""
         try:
+            # Check if output_text is available
+            if not hasattr(self, 'output_text'):
+                print("⚠️ Output text not available yet, skipping sudo status check")
+                return
+                
             if self.check_sudo_permissions():
                 self.append_output("✅ Sudo permissions tersedia - Repository management siap digunakan")
             else:
@@ -2089,7 +2094,10 @@ echo "✅ Sources berhasil dikembalikan dari backup!"
                 self.append_error("1. Jalankan aplikasi dengan: sudo /opt/rijanos-assistant/rijanos-assistant-root.sh")
                 self.append_error("2. Atau konfigurasi sudoers dengan: sudo sh /opt/rijanos-assistant/fix-sudo-permissions.sh")
         except Exception as e:
-            self.append_error(f"Error checking sudo status: {str(e)}")
+            if hasattr(self, 'output_text'):
+                self.append_error(f"Error checking sudo status: {str(e)}")
+            else:
+                print(f"Error checking sudo status: {str(e)}")
     
     def set_application_icon(self):
         """Set application icon from logo.png"""
