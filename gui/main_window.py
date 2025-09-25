@@ -6,6 +6,7 @@ Window utama aplikasi dengan tab navigation
 import sys
 import os
 import json
+import glob
 from PyQt6.QtWidgets import (
     QMainWindow, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QTextEdit, QLabel, QGridLayout, QGroupBox,
@@ -144,6 +145,7 @@ class MainWindow(QMainWindow):
         self.create_maintenance_tab()
         self.create_backup_tab()
         self.create_power_tab()
+        self.create_repository_tab()
         
         # Add AI Chat tab (always visible)
         self.create_ai_chat_tab()
@@ -713,6 +715,283 @@ class MainWindow(QMainWindow):
         layout.addStretch()
         
         self.tab_widget.addTab(power_widget, "⚡ Power")
+    
+    def create_repository_tab(self):
+        """Membuat tab Repository Management"""
+        repo_widget = QWidget()
+        layout = QVBoxLayout(repo_widget)
+        
+        # Repository Selection
+        repo_group = QGroupBox("Pilih Repository Server")
+        repo_layout = QVBoxLayout(repo_group)
+        
+        # Repository info
+        repo_info = QLabel("""
+        <b>Repository Management</b><br>
+        Pilih server repository yang akan digunakan untuk menginstall paket dan update sistem.<br>
+        Server repository Indonesia biasanya lebih cepat dan stabil untuk pengguna di Indonesia.
+        """)
+        repo_info.setWordWrap(True)
+        repo_info.setStyleSheet("color: #666; margin-bottom: 10px;")
+        repo_layout.addWidget(repo_info)
+        
+        # Repository buttons
+        repo_buttons_layout = QGridLayout()
+        
+        # Default Ubuntu Repository
+        self.default_repo_btn = QPushButton("🌍 Default Ubuntu\n(id.archive.ubuntu.com)")
+        self.default_repo_btn.setMinimumHeight(60)
+        self.default_repo_btn.setStyleSheet("""
+            QPushButton {
+                font-size: 12px;
+                font-weight: bold;
+                font-family: 'Arial', 'DejaVu Sans', sans-serif;
+                color: #000000;
+                padding: 10px;
+                margin: 5px;
+                border: 2px solid #007acc;
+                border-radius: 8px;
+                background-color: #f0f8ff;
+            }
+            QPushButton:hover {
+                background-color: #e6f3ff;
+                border-color: #0056b3;
+                color: #000000;
+            }
+            QPushButton:pressed {
+                background-color: #cce7ff;
+                color: #000000;
+            }
+        """)
+        self.default_repo_btn.clicked.connect(lambda: self.change_repository("default"))
+        repo_buttons_layout.addWidget(self.default_repo_btn, 0, 0)
+        
+        # Cloudeka Repository
+        self.cloudeka_repo_btn = QPushButton("🇮🇩 Cloudeka CDN\n(Jakarta, Indonesia)")
+        self.cloudeka_repo_btn.setMinimumHeight(60)
+        self.cloudeka_repo_btn.setStyleSheet("""
+            QPushButton {
+                font-size: 12px;
+                font-weight: bold;
+                font-family: 'Arial', 'DejaVu Sans', sans-serif;
+                color: #000000;
+                padding: 10px;
+                margin: 5px;
+                border: 2px solid #28a745;
+                border-radius: 8px;
+                background-color: #f8fff9;
+            }
+            QPushButton:hover {
+                background-color: #e8f5e8;
+                border-color: #1e7e34;
+                color: #000000;
+            }
+            QPushButton:pressed {
+                background-color: #d4edda;
+                color: #000000;
+            }
+        """)
+        self.cloudeka_repo_btn.clicked.connect(lambda: self.change_repository("cloudeka"))
+        repo_buttons_layout.addWidget(self.cloudeka_repo_btn, 0, 1)
+        
+        # Domainesia Repository
+        self.domainesia_repo_btn = QPushButton("🇮🇩 Domainesia\n(Jakarta, Indonesia)")
+        self.domainesia_repo_btn.setMinimumHeight(60)
+        self.domainesia_repo_btn.setStyleSheet("""
+            QPushButton {
+                font-size: 12px;
+                font-weight: bold;
+                font-family: 'Arial', 'DejaVu Sans', sans-serif;
+                color: #000000;
+                padding: 10px;
+                margin: 5px;
+                border: 2px solid #17a2b8;
+                border-radius: 8px;
+                background-color: #f0fdff;
+            }
+            QPushButton:hover {
+                background-color: #e6f9fc;
+                border-color: #138496;
+                color: #000000;
+            }
+            QPushButton:pressed {
+                background-color: #cceff5;
+                color: #000000;
+            }
+        """)
+        self.domainesia_repo_btn.clicked.connect(lambda: self.change_repository("domainesia"))
+        repo_buttons_layout.addWidget(self.domainesia_repo_btn, 0, 2)
+        
+        # AMS Cloud Repository
+        self.amscloud_repo_btn = QPushButton("🇮🇩 AMS Cloud\n(Jakarta, Indonesia)")
+        self.amscloud_repo_btn.setMinimumHeight(60)
+        self.amscloud_repo_btn.setStyleSheet("""
+            QPushButton {
+                font-size: 12px;
+                font-weight: bold;
+                font-family: 'Arial', 'DejaVu Sans', sans-serif;
+                color: #000000;
+                padding: 10px;
+                margin: 5px;
+                border: 2px solid #6f42c1;
+                border-radius: 8px;
+                background-color: #f8f5ff;
+            }
+            QPushButton:hover {
+                background-color: #f0e6ff;
+                border-color: #5a32a3;
+                color: #000000;
+            }
+            QPushButton:pressed {
+                background-color: #e6d9ff;
+                color: #000000;
+            }
+        """)
+        self.amscloud_repo_btn.clicked.connect(lambda: self.change_repository("amscloud"))
+        repo_buttons_layout.addWidget(self.amscloud_repo_btn, 1, 0)
+        
+        # Neva Cloud Repository
+        self.nevacloud_repo_btn = QPushButton("🇮🇩 Neva Cloud\n(Jakarta, Indonesia)")
+        self.nevacloud_repo_btn.setMinimumHeight(60)
+        self.nevacloud_repo_btn.setStyleSheet("""
+            QPushButton {
+                font-size: 12px;
+                font-weight: bold;
+                font-family: 'Arial', 'DejaVu Sans', sans-serif;
+                color: #000000;
+                padding: 10px;
+                margin: 5px;
+                border: 2px solid #fd7e14;
+                border-radius: 8px;
+                background-color: #fff8f0;
+            }
+            QPushButton:hover {
+                background-color: #fff0e6;
+                border-color: #e55a00;
+                color: #000000;
+            }
+            QPushButton:pressed {
+                background-color: #ffe6cc;
+                color: #000000;
+            }
+        """)
+        self.nevacloud_repo_btn.clicked.connect(lambda: self.change_repository("nevacloud"))
+        repo_buttons_layout.addWidget(self.nevacloud_repo_btn, 1, 1)
+        
+        # Datautama Repository
+        self.datautama_repo_btn = QPushButton("🇮🇩 Datautama\n(Surabaya, Indonesia)")
+        self.datautama_repo_btn.setMinimumHeight(60)
+        self.datautama_repo_btn.setStyleSheet("""
+            QPushButton {
+                font-size: 12px;
+                font-weight: bold;
+                font-family: 'Arial', 'DejaVu Sans', sans-serif;
+                color: #000000;
+                padding: 10px;
+                margin: 5px;
+                border: 2px solid #dc3545;
+                border-radius: 8px;
+                background-color: #fff5f5;
+            }
+            QPushButton:hover {
+                background-color: #ffe6e6;
+                border-color: #c82333;
+                color: #000000;
+            }
+            QPushButton:pressed {
+                background-color: #ffcccc;
+                color: #000000;
+            }
+        """)
+        self.datautama_repo_btn.clicked.connect(lambda: self.change_repository("datautama"))
+        repo_buttons_layout.addWidget(self.datautama_repo_btn, 1, 2)
+        
+        repo_layout.addLayout(repo_buttons_layout)
+        layout.addWidget(repo_group)
+        
+        # Repository Management Actions
+        management_group = QGroupBox("Repository Management")
+        management_layout = QHBoxLayout(management_group)
+        
+        # Backup current sources
+        self.backup_sources_btn = QPushButton("💾 Backup Current Sources")
+        self.backup_sources_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #17a2b8;
+                color: white;
+                font-weight: bold;
+                padding: 10px;
+                margin: 5px;
+            }
+            QPushButton:hover {
+                background-color: #138496;
+            }
+        """)
+        self.backup_sources_btn.clicked.connect(self.backup_sources)
+        management_layout.addWidget(self.backup_sources_btn)
+        
+        # Restore sources
+        self.restore_sources_btn = QPushButton("🔄 Restore Sources")
+        self.restore_sources_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #28a745;
+                color: white;
+                font-weight: bold;
+                padding: 10px;
+                margin: 5px;
+            }
+            QPushButton:hover {
+                background-color: #1e7e34;
+            }
+        """)
+        self.restore_sources_btn.clicked.connect(self.restore_sources)
+        management_layout.addWidget(self.restore_sources_btn)
+        
+        # Test connection
+        self.test_repo_btn = QPushButton("🧪 Test Repository")
+        self.test_repo_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #6f42c1;
+                color: white;
+                font-weight: bold;
+                padding: 10px;
+                margin: 5px;
+            }
+            QPushButton:hover {
+                background-color: #5a32a3;
+            }
+        """)
+        self.test_repo_btn.clicked.connect(self.test_repository)
+        management_layout.addWidget(self.test_repo_btn)
+        
+        layout.addWidget(management_group)
+        
+        # Current Repository Status
+        status_group = QGroupBox("Current Repository Status")
+        status_layout = QVBoxLayout(status_group)
+        
+        self.repo_status_label = QLabel("Status repository akan ditampilkan di sini...")
+        self.repo_status_label.setWordWrap(True)
+        self.repo_status_label.setStyleSheet("""
+            QLabel {
+                background-color: #f8f9fa;
+                border: 1px solid #dee2e6;
+                border-radius: 4px;
+                padding: 10px;
+                font-family: 'Consolas', 'Monaco', monospace;
+                font-size: 11px;
+            }
+        """)
+        status_layout.addWidget(self.repo_status_label)
+        
+        layout.addWidget(status_group)
+        
+        # Load current status
+        self.refresh_repo_status()
+        
+        layout.addStretch()
+        
+        self.tab_widget.addTab(repo_widget, "📦 Repository")
     
     def create_ai_chat_tab(self):
         """Membuat tab Information"""
@@ -1493,10 +1772,254 @@ class MainWindow(QMainWindow):
     # Multimedia methods
     def install_single_package(self, package_name):
         """Install paket tunggal"""
-        success, stdout, stderr = self.package_manager.install_package(package_name)
+        success, stdout, stderr = self.package_manager.install_package(package_name)                                                                            
         
         if success:
             self.append_output(f"Installing {package_name}...")
             self.append_output(stdout)
         else:
             self.append_error(f"Error installing {package_name}: {stderr}")
+    
+    # Repository Management Methods
+    def change_repository(self, repo_type):
+        """Mengganti repository server"""
+        try:
+            # Backup current sources first
+            self.backup_sources()
+            
+            # Define repository configurations
+            repos = {
+                "default": {
+                    "name": "Default Ubuntu",
+                    "sources_list": """# Ubuntu sources have moved to /etc/apt/sources.list.d/ubuntu.sources
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://id.archive.ubuntu.com/ubuntu/ noble main universe restricted multiverse
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://id.archive.ubuntu.com/ubuntu/ noble-updates main universe restricted multiverse
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://id.archive.ubuntu.com/ubuntu/ noble-backports main universe restricted multiverse
+
+# Security updates
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] https://security.ubuntu.com/ubuntu/ noble-security main universe restricted multiverse""",
+                    "sources_d": """Types: deb
+URIs: https://id.archive.ubuntu.com/ubuntu/
+Suites: noble noble-updates noble-backports
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+Types: deb
+URIs: https://security.ubuntu.com/ubuntu/
+Suites: noble-security
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg"""
+                },
+                "cloudeka": {
+                    "name": "Cloudeka CDN",
+                    "sources_list": """# Ubuntu sources have moved to /etc/apt/sources.list.d/ubuntu.sources
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://cdn.repo.cloudeka.id/ubuntu/ noble main universe restricted multiverse
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://cdn.repo.cloudeka.id/ubuntu/ noble-updates main universe restricted multiverse
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://cdn.repo.cloudeka.id/ubuntu/ noble-backports main universe restricted multiverse
+
+# Security updates
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://cdn.repo.cloudeka.id/ubuntu/ noble-security main universe restricted multiverse""",
+                    "sources_d": """Types: deb
+URIs: http://cdn.repo.cloudeka.id/ubuntu/
+Suites: noble noble-updates noble-backports noble-security noble-proposed
+Components: main universe restricted multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg"""
+                },
+                "domainesia": {
+                    "name": "Domainesia",
+                    "sources_list": """# Ubuntu sources have moved to /etc/apt/sources.list.d/ubuntu.sources
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://linux.domainesia.com/ubuntu/ubuntu-archive/ noble main universe restricted multiverse
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://linux.domainesia.com/ubuntu/ubuntu-archive/ noble-updates main universe restricted multiverse
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://linux.domainesia.com/ubuntu/ubuntu-archive/ noble-backports main universe restricted multiverse
+
+# Security updates
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://linux.domainesia.com/ubuntu/ubuntu-archive/ noble-security main universe restricted multiverse""",
+                    "sources_d": """Types: deb
+URIs: http://linux.domainesia.com/ubuntu/ubuntu-archive/
+Suites: noble noble-updates noble-backports noble-security noble-proposed
+Components: main universe restricted multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg"""
+                },
+                "amscloud": {
+                    "name": "AMS Cloud",
+                    "sources_list": """# Ubuntu sources have moved to /etc/apt/sources.list.d/ubuntu.sources
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://mirror.amscloud.co.id/ubuntu/ noble main universe restricted multiverse
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://mirror.amscloud.co.id/ubuntu/ noble-updates main universe restricted multiverse
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://mirror.amscloud.co.id/ubuntu/ noble-backports main universe restricted multiverse
+
+# Security updates
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://mirror.amscloud.co.id/ubuntu/ noble-security main universe restricted multiverse""",
+                    "sources_d": """Types: deb
+URIs: http://mirror.amscloud.co.id/ubuntu/
+Suites: noble noble-updates noble-backports noble-security noble-proposed
+Components: main universe restricted multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg"""
+                },
+                "nevacloud": {
+                    "name": "Neva Cloud",
+                    "sources_list": """# Ubuntu sources have moved to /etc/apt/sources.list.d/ubuntu.sources
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://mirror.nevacloud.com/ubuntu/ubuntu-archive noble main universe restricted multiverse
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://mirror.nevacloud.com/ubuntu/ubuntu-archive noble-updates main universe restricted multiverse
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://mirror.nevacloud.com/ubuntu/ubuntu-archive noble-backports main universe restricted multiverse
+
+# Security updates
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://mirror.nevacloud.com/ubuntu/ubuntu-archive noble-security main universe restricted multiverse""",
+                    "sources_d": """Types: deb
+URIs: http://mirror.nevacloud.com/ubuntu/ubuntu-archive
+Suites: noble noble-updates noble-backports noble-security noble-proposed
+Components: main universe restricted multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg"""
+                },
+                "datautama": {
+                    "name": "Datautama",
+                    "sources_list": """# Ubuntu sources have moved to /etc/apt/sources.list.d/ubuntu.sources
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://kartolo.sby.datautama.net.id/ubuntu/ noble main universe restricted multiverse
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://kartolo.sby.datautama.net.id/ubuntu/ noble-updates main universe restricted multiverse
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://kartolo.sby.datautama.net.id/ubuntu/ noble-backports main universe restricted multiverse
+
+# Security updates
+deb [signed-by=/usr/share/keyrings/ubuntu-archive-keyring.gpg] http://kartolo.sby.datautama.net.id/ubuntu/ noble-security main universe restricted multiverse""",
+                    "sources_d": """Types: deb
+URIs: http://kartolo.sby.datautama.net.id/ubuntu/
+Suites: noble noble-updates noble-backports noble-security noble-proposed
+Components: main universe restricted multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg"""
+                }
+            }
+            
+            if repo_type not in repos:
+                self.append_error(f"Repository type '{repo_type}' tidak dikenal!")
+                return
+            
+            repo_config = repos[repo_type]
+            
+            # Show confirmation dialog
+            reply = QMessageBox.question(
+                self, 
+                "Konfirmasi Ganti Repository", 
+                f"Apakah Anda yakin ingin mengganti repository ke {repo_config['name']}?\n\n"
+                "Perubahan ini akan memodifikasi file /etc/apt/sources.list dan /etc/apt/sources.list.d/ubuntu.sources",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No
+            )
+            
+            if reply != QMessageBox.StandardButton.Yes:
+                return
+            
+            self.append_output(f"Mengganti repository ke {repo_config['name']}...")
+            
+            # Update sources.list
+            self.execute_command(f"sudo tee /etc/apt/sources.list > /dev/null << 'EOF'\n{repo_config['sources_list']}\nEOF")
+            
+            # Update sources.list.d/ubuntu.sources
+            self.execute_command(f"sudo tee /etc/apt/sources.list.d/ubuntu.sources > /dev/null << 'EOF'\n{repo_config['sources_d']}\nEOF")
+            
+            # Update package lists
+            self.execute_command("sudo apt update")
+            
+            self.append_output(f"✅ Repository berhasil diganti ke {repo_config['name']}!")
+            self.refresh_repo_status()
+            
+        except Exception as e:
+            self.append_error(f"Error mengganti repository: {str(e)}")
+    
+    def backup_sources(self):
+        """Backup current sources files"""
+        try:
+            timestamp = self.get_timestamp()
+            backup_dir = f"/tmp/apt-sources-backup-{timestamp}"
+            
+            self.execute_command(f"sudo mkdir -p {backup_dir}")
+            self.execute_command(f"sudo cp /etc/apt/sources.list {backup_dir}/sources.list.backup")
+            self.execute_command(f"sudo cp /etc/apt/sources.list.d/ubuntu.sources {backup_dir}/ubuntu.sources.backup")
+            self.execute_command(f"sudo chown -R $USER:$USER {backup_dir}")
+            
+            self.append_output(f"✅ Backup sources berhasil dibuat di: {backup_dir}")
+            
+        except Exception as e:
+            self.append_error(f"Error membuat backup sources: {str(e)}")
+    
+    def restore_sources(self):
+        """Restore sources from backup"""
+        try:
+            # Find latest backup
+            backup_dirs = glob.glob("/tmp/apt-sources-backup-*")
+            if not backup_dirs:
+                self.append_error("Tidak ada backup sources yang ditemukan!")
+                return
+            
+            latest_backup = max(backup_dirs, key=os.path.getctime)
+            
+            # Show confirmation dialog
+            reply = QMessageBox.question(
+                self, 
+                "Konfirmasi Restore", 
+                f"Apakah Anda yakin ingin mengembalikan sources dari backup?\n\n"
+                f"Backup: {latest_backup}",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No
+            )
+            
+            if reply != QMessageBox.StandardButton.Yes:
+                return
+            
+            # Restore files
+            self.execute_command(f"sudo cp {latest_backup}/sources.list.backup /etc/apt/sources.list")
+            self.execute_command(f"sudo cp {latest_backup}/ubuntu.sources.backup /etc/apt/sources.list.d/ubuntu.sources")
+            
+            # Update package lists
+            self.execute_command("sudo apt update")
+            
+            self.append_output(f"✅ Sources berhasil dikembalikan dari backup!")
+            self.refresh_repo_status()
+            
+        except Exception as e:
+            self.append_error(f"Error restore sources: {str(e)}")
+    
+    def test_repository(self):
+        """Test koneksi ke repository"""
+        try:
+            self.append_output("🧪 Testing repository connection...")
+            self.execute_command("sudo apt update --dry-run")
+            self.append_output("✅ Repository connection test completed!")
+            
+        except Exception as e:
+            self.append_error(f"Error testing repository: {str(e)}")
+    
+    def refresh_repo_status(self):
+        """Refresh repository status display"""
+        try:
+            # Read current sources.list
+            result = self.command_executor.execute_safe_command("cat /etc/apt/sources.list")
+            if result[0]:
+                sources_list = result[1]
+            else:
+                sources_list = "Error reading sources.list"
+            
+            # Read current ubuntu.sources
+            result = self.command_executor.execute_safe_command("cat /etc/apt/sources.list.d/ubuntu.sources")
+            if result[0]:
+                ubuntu_sources = result[1]
+            else:
+                ubuntu_sources = "Error reading ubuntu.sources"
+            
+            # Display status
+            status_text = f"""
+<b>Current Repository Configuration:</b>
+
+<b>sources.list:</b>
+<pre>{sources_list}</pre>
+
+<b>ubuntu.sources:</b>
+<pre>{ubuntu_sources}</pre>
+            """
+            
+            self.repo_status_label.setText(status_text)
+            
+        except Exception as e:
+            self.repo_status_label.setText(f"Error loading repository status: {str(e)}")
+    
+    def get_timestamp(self):
+        """Get current timestamp for backup naming"""
+        from datetime import datetime
+        return datetime.now().strftime("%Y%m%d_%H%M%S")
