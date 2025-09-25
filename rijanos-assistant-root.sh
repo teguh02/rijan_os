@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 # RijanOS Assistant Root Wrapper
 # Script untuk menjalankan RijanOS Assistant sebagai root saat autostart
 
 # Check if running as root
-if [ "$EUID" -ne 0 ]; then
+if [ "$(id -u)" -ne 0 ]; then
     # Try to run with sudo
     exec sudo -E "$0" "$@"
 fi
@@ -12,7 +12,8 @@ fi
 find_display() {
     # Try to find the active display
     for display in :0 :1 :2; do
-        if [ -S "/tmp/.X11-unix/X${display#:}" ]; then
+        display_num=$(echo "$display" | cut -c2-)
+        if [ -S "/tmp/.X11-unix/X$display_num" ]; then
             echo "$display"
             return 0
         fi
@@ -23,25 +24,36 @@ find_display() {
 # Function to find XAUTHORITY
 find_xauthority() {
     # Try different possible locations
-    local possible_paths=(
-        "/home/$SUDO_USER/.Xauthority"
-        "/home/$SUDO_USER/.X0-lock"
-        "/run/user/$(id -u "$SUDO_USER")/gdm/Xauthority"
-        "/var/lib/gdm3/.Xauthority"
-        "/var/lib/gdm/.Xauthority"
-    )
-    
-    for path in "${possible_paths[@]}"; do
-        if [ -f "$path" ]; then
-            echo "$path"
+    if [ -n "$SUDO_USER" ]; then
+        # Check user's home directory
+        if [ -f "/home/$SUDO_USER/.Xauthority" ]; then
+            echo "/home/$SUDO_USER/.Xauthority"
             return 0
         fi
-    done
+        
+        # Check user's gdm directory
+        user_id=$(id -u "$SUDO_USER" 2>/dev/null)
+        if [ -n "$user_id" ] && [ -f "/run/user/$user_id/gdm/Xauthority" ]; then
+            echo "/run/user/$user_id/gdm/Xauthority"
+            return 0
+        fi
+    fi
+    
+    # Check system XAUTHORITY files
+    if [ -f "/var/lib/gdm3/.Xauthority" ]; then
+        echo "/var/lib/gdm3/.Xauthority"
+        return 0
+    fi
+    
+    if [ -f "/var/lib/gdm/.Xauthority" ]; then
+        echo "/var/lib/gdm/.Xauthority"
+        return 0
+    fi
     
     # If no XAUTHORITY found, try to create one
     if [ -n "$SUDO_USER" ]; then
-        local user_home="/home/$SUDO_USER"
-        local xauth_file="$user_home/.Xauthority"
+        user_home="/home/$SUDO_USER"
+        xauth_file="$user_home/.Xauthority"
         
         # Try to copy from system XAUTHORITY
         if [ -f "/var/lib/gdm3/.Xauthority" ]; then
