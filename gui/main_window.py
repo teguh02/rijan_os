@@ -992,6 +992,9 @@ class MainWindow(QMainWindow):
         # Load current status
         self.refresh_repo_status()
         
+        # Check and display sudo status
+        self.check_and_display_sudo_status()
+        
         layout.addStretch()
         
         self.tab_widget.addTab(repo_widget, "📦 Repository")
@@ -1797,6 +1800,12 @@ class MainWindow(QMainWindow):
     def change_repository(self, repo_type):
         """Mengganti repository server"""
         try:
+            # Check sudo permissions first
+            if not self.check_sudo_permissions():
+                self.append_error("❌ Sudo permissions tidak tersedia!")
+                self.append_error("Jalankan aplikasi dengan: sudo /opt/rijanos-assistant/rijanos-assistant-root.sh")
+                return
+            
             # Backup current sources first
             self.backup_sources()
             
@@ -1924,17 +1933,15 @@ Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg"""
             # Combine all commands into one to avoid thread conflicts
             combined_command = f"""
 # Update sources.list
-sudo tee /etc/apt/sources.list > /dev/null << 'EOF'
-{repo_config['sources_list']}
-EOF
+echo '{repo_config['sources_list']}' | sudo tee /etc/apt/sources.list > /dev/null
 
 # Update sources.list.d/ubuntu.sources  
-sudo tee /etc/apt/sources.list.d/ubuntu.sources > /dev/null << 'EOF'
-{repo_config['sources_d']}
-EOF
+echo '{repo_config['sources_d']}' | sudo tee /etc/apt/sources.list.d/ubuntu.sources > /dev/null
 
 # Update package lists
 sudo apt update
+
+echo "✅ Repository berhasil diganti ke {repo_config['name']}!"
 """
             
             self.execute_command(combined_command)
@@ -2062,6 +2069,27 @@ echo "✅ Sources berhasil dikembalikan dari backup!"
         """Get current timestamp for backup naming"""
         from datetime import datetime
         return datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    def check_sudo_permissions(self):
+        """Check if sudo permissions are available"""
+        try:
+            result = self.command_executor.execute_safe_command("sudo -n true")
+            return result[0]  # Return True if sudo works without password
+        except Exception:
+            return False
+    
+    def check_and_display_sudo_status(self):
+        """Check and display sudo status in repository tab"""
+        try:
+            if self.check_sudo_permissions():
+                self.append_output("✅ Sudo permissions tersedia - Repository management siap digunakan")
+            else:
+                self.append_error("❌ Sudo permissions tidak tersedia!")
+                self.append_error("Untuk menggunakan fitur Repository Management:")
+                self.append_error("1. Jalankan aplikasi dengan: sudo /opt/rijanos-assistant/rijanos-assistant-root.sh")
+                self.append_error("2. Atau konfigurasi sudoers dengan: sudo sh /opt/rijanos-assistant/fix-sudo-permissions.sh")
+        except Exception as e:
+            self.append_error(f"Error checking sudo status: {str(e)}")
     
     def set_application_icon(self):
         """Set application icon from logo.png"""
