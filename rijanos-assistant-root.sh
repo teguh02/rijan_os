@@ -80,8 +80,18 @@ if ! xset q >/dev/null 2>&1; then
     
     # Try to fix X11 permissions
     if [ -n "$SUDO_USER" ]; then
-        xhost +local:root >/dev/null 2>&1
-        xhost +SI:localuser:root >/dev/null 2>&1
+        # Run xhost as the original user
+        su - "$SUDO_USER" -c "xhost +local:root" >/dev/null 2>&1 || true
+        su - "$SUDO_USER" -c "xhost +SI:localuser:root" >/dev/null 2>&1 || true
+        su - "$SUDO_USER" -c "xhost +local:" >/dev/null 2>&1 || true
+    fi
+    
+    # Test again
+    if ! xset q >/dev/null 2>&1; then
+        echo "Warning: Still cannot connect to display. GUI may not work properly."
+        echo "Please run: sudo /opt/rijanos-assistant/fix-x11-permissions.sh"
+    else
+        echo "X11 permissions fixed successfully!"
     fi
 fi
 

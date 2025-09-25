@@ -231,8 +231,15 @@ if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then
     sudo mkdir -p /etc/xdg/autostart
     sudo cp rijanos-assistant.desktop /etc/xdg/autostart/
     sudo chmod 644 /etc/xdg/autostart/rijanos-assistant.desktop
+    
+    # Also install desktop entry for manual launch
+    sudo mkdir -p /usr/share/applications
+    sudo cp rijanos-assistant.desktop /usr/share/applications/
+    sudo chmod 644 /usr/share/applications/rijanos-assistant.desktop
+    
     print_success "System-wide autostart berhasil dikonfigurasi!"
-    print_status "RijanOS Assistant akan berjalan otomatis saat login untuk semua pengguna"
+    print_status "RijanOS Assistant akan berjalan otomatis saat login sebagai root"
+    print_status "Pastikan untuk menjalankan fix-x11-permissions.sh jika ada masalah GUI"
 else
     print_warning "Autostart tidak dikonfigurasi. Anda dapat mengaturnya nanti dengan:"
     print_warning "sudo cp /opt/rijanos-assistant/rijanos-assistant.desktop /etc/xdg/autostart/"

@@ -10,3 +10,4 @@ Icon=/opt/rijanos-assistant/assets/logo.png
 Categories=System;Utility;
 Keywords=assistant;system;management;rijanos;
 StartupNotify=true
+StartupWMClass=RijanOS Assistant

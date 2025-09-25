@@ -90,32 +90,32 @@ else
     print_warning "You may need to run this script from a desktop session"
 fi
 
-print_header "5. Creating desktop entry for user execution..."
+print_header "5. Creating desktop entry for manual execution..."
 
-# Create a desktop entry that runs as user
-cat > /usr/share/applications/rijanos-assistant-user.desktop << 'EOF'
+# Create a desktop entry for manual launch
+cat > /usr/share/applications/rijanos-assistant.desktop << 'EOF'
 [Desktop Entry]
 Type=Application
-Exec=/opt/rijanos-assistant/rijanos-assistant-user.sh
+Exec=/opt/rijanos-assistant/rijanos-assistant-root.sh
 Hidden=false
 NoDisplay=false
-Name=RijanOS Assistant (User)
-Comment=Start RijanOS Assistant as regular user
+Name=RijanOS Assistant
+Comment=Start RijanOS Assistant
 Icon=/opt/rijanos-assistant/assets/logo.png
 Categories=System;Utility;
 Keywords=assistant;system;management;rijanos;
 StartupNotify=true
 EOF
 
-chmod 644 /usr/share/applications/rijanos-assistant-user.desktop
-print_success "Desktop entry created for user execution"
+chmod 644 /usr/share/applications/rijanos-assistant.desktop
+print_success "Desktop entry created for manual execution"
 
 print_header "6. Fix X11 permissions completed!"
 echo "================================================"
 print_success "X11 permissions have been configured!"
 print_status "You can now run RijanOS Assistant using:"
 echo "  • As root: sudo /opt/rijanos-assistant/rijanos-assistant-root.sh"
-echo "  • As user: /opt/rijanos-assistant/rijanos-assistant-user.sh"
-echo "  • From menu: RijanOS Assistant (User)"
+echo "  • From menu: RijanOS Assistant"
+echo "  • Autostart: Will run automatically on login"
 echo
 print_status "If you still have issues, try running from a desktop session"
