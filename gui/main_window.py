@@ -1412,6 +1412,11 @@ class MainWindow(QMainWindow):
     
     def closeEvent(self, event):
         """Handler ketika window ditutup"""
+        # Cleanup running threads
+        if self.command_thread and self.command_thread.isRunning():
+            self.command_thread.terminate()
+            self.command_thread.wait(3000)  # Wait up to 3 seconds
+        
         if self.system_tray and self.system_tray.isVisible():
             # Minimize to tray instead of closing
             self.hide()
@@ -1460,6 +1465,11 @@ class MainWindow(QMainWindow):
         
         self.progress_bar.setVisible(True)
         self.progress_bar.setRange(0, 0)  # Indeterminate progress
+        
+        # Cleanup previous thread if exists
+        if self.command_thread and self.command_thread.isRunning():
+            self.command_thread.terminate()
+            self.command_thread.wait()
         
         # Start command thread
         self.command_thread = CommandThread(self.command_executor, command)
@@ -1908,17 +1918,26 @@ Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg"""
             
             self.append_output(f"Mengganti repository ke {repo_config['name']}...")
             
-            # Update sources.list
-            self.execute_command(f"sudo tee /etc/apt/sources.list > /dev/null << 'EOF'\n{repo_config['sources_list']}\nEOF")
+            # Combine all commands into one to avoid thread conflicts
+            combined_command = f"""
+# Update sources.list
+sudo tee /etc/apt/sources.list > /dev/null << 'EOF'
+{repo_config['sources_list']}
+EOF
+
+# Update sources.list.d/ubuntu.sources  
+sudo tee /etc/apt/sources.list.d/ubuntu.sources > /dev/null << 'EOF'
+{repo_config['sources_d']}
+EOF
+
+# Update package lists
+sudo apt update
+"""
             
-            # Update sources.list.d/ubuntu.sources
-            self.execute_command(f"sudo tee /etc/apt/sources.list.d/ubuntu.sources > /dev/null << 'EOF'\n{repo_config['sources_d']}\nEOF")
+            self.execute_command(combined_command)
             
-            # Update package lists
-            self.execute_command("sudo apt update")
-            
-            self.append_output(f"✅ Repository berhasil diganti ke {repo_config['name']}!")
-            self.refresh_repo_status()
+            # Use QTimer to refresh status after command completes
+            QTimer.singleShot(2000, self.refresh_repo_status)
             
         except Exception as e:
             self.append_error(f"Error mengganti repository: {str(e)}")
@@ -1929,12 +1948,22 @@ Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg"""
             timestamp = self.get_timestamp()
             backup_dir = f"/tmp/apt-sources-backup-{timestamp}"
             
-            self.execute_command(f"sudo mkdir -p {backup_dir}")
-            self.execute_command(f"sudo cp /etc/apt/sources.list {backup_dir}/sources.list.backup")
-            self.execute_command(f"sudo cp /etc/apt/sources.list.d/ubuntu.sources {backup_dir}/ubuntu.sources.backup")
-            self.execute_command(f"sudo chown -R $USER:$USER {backup_dir}")
+            # Combine backup commands into one
+            backup_command = f"""
+# Create backup directory
+sudo mkdir -p {backup_dir}
+
+# Backup sources files
+sudo cp /etc/apt/sources.list {backup_dir}/sources.list.backup
+sudo cp /etc/apt/sources.list.d/ubuntu.sources {backup_dir}/ubuntu.sources.backup
+
+# Change ownership
+sudo chown -R $USER:$USER {backup_dir}
+
+echo "✅ Backup sources berhasil dibuat di: {backup_dir}"
+"""
             
-            self.append_output(f"✅ Backup sources berhasil dibuat di: {backup_dir}")
+            self.execute_command(backup_command)
             
         except Exception as e:
             self.append_error(f"Error membuat backup sources: {str(e)}")
@@ -1963,15 +1992,22 @@ Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg"""
             if reply != QMessageBox.StandardButton.Yes:
                 return
             
-            # Restore files
-            self.execute_command(f"sudo cp {latest_backup}/sources.list.backup /etc/apt/sources.list")
-            self.execute_command(f"sudo cp {latest_backup}/ubuntu.sources.backup /etc/apt/sources.list.d/ubuntu.sources")
+            # Combine restore commands into one
+            restore_command = f"""
+# Restore files
+sudo cp {latest_backup}/sources.list.backup /etc/apt/sources.list
+sudo cp {latest_backup}/ubuntu.sources.backup /etc/apt/sources.list.d/ubuntu.sources
+
+# Update package lists
+sudo apt update
+
+echo "✅ Sources berhasil dikembalikan dari backup!"
+"""
             
-            # Update package lists
-            self.execute_command("sudo apt update")
+            self.execute_command(restore_command)
             
-            self.append_output(f"✅ Sources berhasil dikembalikan dari backup!")
-            self.refresh_repo_status()
+            # Use QTimer to refresh status after command completes
+            QTimer.singleShot(2000, self.refresh_repo_status)
             
         except Exception as e:
             self.append_error(f"Error restore sources: {str(e)}")
