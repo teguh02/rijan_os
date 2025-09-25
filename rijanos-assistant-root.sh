@@ -4,9 +4,12 @@
 
 # Check if running as root
 if [ "$(id -u)" -ne 0 ]; then
-    # Try to run with sudo
-    exec sudo -E "$0" "$@"
+    # Try to run with sudo (without -E to avoid environment preservation issues)
+    exec sudo "$0" "$@"
 fi
+
+# Get the original user who invoked sudo
+ORIGINAL_USER="${SUDO_USER:-$(logname 2>/dev/null || echo "root")}"
 
 # Function to find the current user's display
 find_display() {
@@ -24,15 +27,15 @@ find_display() {
 # Function to find XAUTHORITY
 find_xauthority() {
     # Try different possible locations
-    if [ -n "$SUDO_USER" ]; then
+    if [ -n "$ORIGINAL_USER" ] && [ "$ORIGINAL_USER" != "root" ]; then
         # Check user's home directory
-        if [ -f "/home/$SUDO_USER/.Xauthority" ]; then
-            echo "/home/$SUDO_USER/.Xauthority"
+        if [ -f "/home/$ORIGINAL_USER/.Xauthority" ]; then
+            echo "/home/$ORIGINAL_USER/.Xauthority"
             return 0
         fi
         
         # Check user's gdm directory
-        user_id=$(id -u "$SUDO_USER" 2>/dev/null)
+        user_id=$(id -u "$ORIGINAL_USER" 2>/dev/null)
         if [ -n "$user_id" ] && [ -f "/run/user/$user_id/gdm/Xauthority" ]; then
             echo "/run/user/$user_id/gdm/Xauthority"
             return 0
@@ -51,14 +54,14 @@ find_xauthority() {
     fi
     
     # If no XAUTHORITY found, try to create one
-    if [ -n "$SUDO_USER" ]; then
-        user_home="/home/$SUDO_USER"
+    if [ -n "$ORIGINAL_USER" ] && [ "$ORIGINAL_USER" != "root" ]; then
+        user_home="/home/$ORIGINAL_USER"
         xauth_file="$user_home/.Xauthority"
         
         # Try to copy from system XAUTHORITY
         if [ -f "/var/lib/gdm3/.Xauthority" ]; then
             cp "/var/lib/gdm3/.Xauthority" "$xauth_file" 2>/dev/null
-            chown "$SUDO_USER:$SUDO_USER" "$xauth_file" 2>/dev/null
+            chown "$ORIGINAL_USER:$ORIGINAL_USER" "$xauth_file" 2>/dev/null
             if [ -f "$xauth_file" ]; then
                 echo "$xauth_file"
                 return 0
@@ -91,11 +94,11 @@ if ! xset q >/dev/null 2>&1; then
     echo "Trying to fix X11 permissions..."
     
     # Try to fix X11 permissions
-    if [ -n "$SUDO_USER" ]; then
+    if [ -n "$ORIGINAL_USER" ] && [ "$ORIGINAL_USER" != "root" ]; then
         # Run xhost as the original user
-        su - "$SUDO_USER" -c "xhost +local:root" >/dev/null 2>&1 || true
-        su - "$SUDO_USER" -c "xhost +SI:localuser:root" >/dev/null 2>&1 || true
-        su - "$SUDO_USER" -c "xhost +local:" >/dev/null 2>&1 || true
+        su - "$ORIGINAL_USER" -c "xhost +local:root" >/dev/null 2>&1 || true
+        su - "$ORIGINAL_USER" -c "xhost +SI:localuser:root" >/dev/null 2>&1 || true
+        su - "$ORIGINAL_USER" -c "xhost +local:" >/dev/null 2>&1 || true
     fi
     
     # Test again
@@ -118,6 +121,7 @@ if [ ! -f "./venv/bin/python" ]; then
 fi
 
 echo "Starting RijanOS Assistant as root..."
+echo "Original User: $ORIGINAL_USER"
 echo "Display: $DISPLAY"
 echo "XAUTHORITY: $XAUTHORITY"
 
